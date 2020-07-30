@@ -86,4 +86,4 @@ Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/
 
 This is a _client side_ only mod, so you should install it locally if you're playing on a server. Please note that using this mod might be considered cheating on some servers - so you could get banned for using it without permission. _Please make sure the server administrators are ok with you using this mod_.
 
-**Note** the mod is currently in beta phase. It was not tested extensively yet and so some problems could have slipped through the cracks. _Please **back up** your beloved save games before using this mod_.
+**Note** the mod is currently in beta. It was not tested extensively yet and so some problems could have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
