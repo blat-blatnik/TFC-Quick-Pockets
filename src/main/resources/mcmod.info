@@ -1,0 +1,16 @@
+[
+{
+  "modid": "tfcquickpockets",
+  "name": "TFC+ Quick Pockets",
+  "description": "Adds some quality of life improvements to inventory screens. So that you can focus on the game, not the inventory management.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Blat Blatnik"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": ["required-after:terrafirmacraftplus;"]
+}
+]
