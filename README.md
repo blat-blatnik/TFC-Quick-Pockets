@@ -80,7 +80,7 @@ After it has finished, the mod you built should be in the `./build/libs/` direct
 
 ## Download and Install
 
-Download the latest version here. 
+Download the latest version [here](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases). 
 
 Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1, 0.85, 0.85.1. 
 
