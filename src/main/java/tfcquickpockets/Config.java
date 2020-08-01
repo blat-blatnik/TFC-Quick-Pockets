@@ -19,12 +19,19 @@ public class Config implements IModGuiFactory {
 
     public static Configuration config;
 
+    public static boolean autoRefillBlocks = true;
+    public static boolean autoRefillTools = true;
     public static boolean invertHotbarCycleDirection = false;
     public static float hotbarCyclePreviewTransparency = 0.6f;
     public static float hotbarCyclePreviewItemIconScale = 0.5f;
     public static float hotbarCyclePreviewHeight = 0.73f;
     public static int hotbarCyclePreviewXOffset = 0;
     public static int hotbarCyclePreviewYOffset = 0;
+    public static boolean allowQuickAccessVessel = true;
+    public static boolean allowQuickAccessSack = true;
+    public static boolean allowQuickAccessHideBag = true;
+    public static boolean allowQuickAccessLeatherBag = true;
+    public static boolean allowQuickAccessQuiver = true;
     public static int waterskinFixDelayTicks = 3;
 
     public static void initialize(String configDirectory) {
@@ -38,6 +45,10 @@ public class Config implements IModGuiFactory {
     public static void load() {
         invertHotbarCycleDirection = config.getBoolean("Invert Scrolling Direction", Configuration.CATEGORY_GENERAL, false,
                 "\nIf set to true, scrolling the mouse wheel up will move you *down* one inventory row, otherwise scrolling up will move you *up*.\n\n");
+        //autoRefillTools = config.getBoolean("Auto-refill Tools", Configuration.CATEGORY_GENERAL, true,
+        //        "\nWhether to automatically swap in a new tool when the one you're using breaks - if you have a replacement in your inventory.\n\n");
+        //autoRefillBlocks = config.getBoolean("Auto-refill Blocks", Configuration.CATEGORY_GENERAL, true,
+        //        "\nWhether to automatically swap in a new stack of blocks when you up one - if you have some extra in your inventory.\n\n");
         hotbarCyclePreviewTransparency = config.getFloat("Hotbar Preview Transparency", Configuration.CATEGORY_GENERAL, 0.6f, 0.0f, 1.0f,
                 "\nHow transparent the hotbar cycling preview slots will appear.\n\nThis doesn't affect the current hotbar row, only the preview rows.\n\n");
         hotbarCyclePreviewItemIconScale = config.getFloat("Hotbar Preview Item Icon Scale", Configuration.CATEGORY_GENERAL, 0.5f, 0.0f, 1.0f,
@@ -48,6 +59,16 @@ public class Config implements IModGuiFactory {
                 "\nWhere on the screen the hotbar cycle preview appears.\n\n");
         hotbarCyclePreviewYOffset = config.getInt("Hotbar Preview Y Offset", Configuration.CATEGORY_GENERAL, 0, -10000, +10000,
                 "\nWhere on the screen the hotbar cycle preview appears.\n\n");
+        allowQuickAccessVessel = config.getBoolean("Allow Quick-Access on Vessels", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to allow right-clicking on a small vessel to quickly access it from any inventory screen.\n\n");
+        allowQuickAccessSack = config.getBoolean("Allow Quick-Access on Burlap Sacks", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to allow right-clicking on a burlap sack to quickly access it from any inventory screen.\n\n");
+        allowQuickAccessHideBag = config.getBoolean("Allow Quick-Access on Hide Bags", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to allow right-clicking on a hide bag to quickly access it from any inventory screen.\n\n");
+        allowQuickAccessLeatherBag = config.getBoolean("Allow Quick-Access on Leather Bags", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to allow right-clicking on a leather bag to quickly access it from any inventory screen.\n\n");
+        allowQuickAccessQuiver = config.getBoolean("Allow Quick-Access on Quivers", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to allow right-clicking on a quiver to quickly access it from any inventory screen.\n\n");
         waterskinFixDelayTicks = config.getInt("Waterskin Fix Delay Ticks", Configuration.CATEGORY_GENERAL, 3, 0, 20,
                 "\nSince the waterskin fix might not always work depending on your exact setup, you can use this value to tweak it.\n\nLower values will try to fix the waterskin faster, but are less likely to work. Higher values have a higher chance to work but there might be a noticeable delay.\n\nSet this to 0 to disable the waterskin fix.\n\n");
 
