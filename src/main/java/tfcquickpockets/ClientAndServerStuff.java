@@ -2,6 +2,8 @@ package tfcquickpockets;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.EventPriority;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -9,9 +11,14 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 
 public class ClientAndServerStuff {
 
@@ -25,6 +32,8 @@ public class ClientAndServerStuff {
         network.registerMessage(SwapInventorySlotsPacket.Handler.class, SwapInventorySlotsPacket.class, 1, Side.SERVER);
         network.registerMessage(CycleInventoryRowsPacket.Handler.class, CycleInventoryRowsPacket.class, 2, Side.CLIENT);
         network.registerMessage(CycleInventoryRowsPacket.Handler.class, CycleInventoryRowsPacket.class, 3, Side.SERVER);
+
+        MinecraftForge.EVENT_BUS.register(new ServerEventHandler());
     }
 
     public static void swapPlayerInventorySlots(EntityPlayer player, int slot1, int slot2) {
@@ -59,6 +68,30 @@ public class ClientAndServerStuff {
                     ItemStack stack2 = inventory.getSlot(slot2).getStack();
                     inventory.putStackInSlot(slot1, stack2);
                     inventory.putStackInSlot(slot2, stack1);
+                }
+            }
+        }
+    }
+
+    public static class ServerEventHandler {
+        @SubscribeEvent(priority=EventPriority.LOW) @SuppressWarnings("unused")
+        public void stopZombiesAndSpidersFromSpawningUselessJunk(LivingDropsEvent event) {
+            for (int i = 0; i < event.drops.size(); ++i) {
+                EntityItem entityItem = event.drops.get(i);
+                if (entityItem != null) {
+                    ItemStack stack = entityItem.getEntityItem();
+                    if (stack != null) {
+                        Item item = stack.getItem();
+                        if (item != null) {
+                            boolean cancelDrop =
+                                (item == Items.rotten_flesh && Config.disableRottenFlesh) ||
+                                (item == Items.spider_eye && Config.disableSpiderEyes);
+                            if (cancelDrop) {
+                                event.drops.remove(i);
+                                --i;
+                            }
+                        }
+                    }
                 }
             }
         }

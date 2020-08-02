@@ -19,8 +19,11 @@ public class Config implements IModGuiFactory {
 
     public static Configuration config;
 
-    public static boolean autoRefillBlocks = true;
     public static boolean autoRefillTools = true;
+    public static boolean autoRefillWeapons = true;
+    public static boolean autoRefillFood = true;
+    public static boolean autoRefillBlocks = true;
+    public static boolean autoRefillMisc = true;
     public static boolean invertHotbarCycleDirection = false;
     public static float hotbarCyclePreviewTransparency = 0.6f;
     public static float hotbarCyclePreviewItemIconScale = 0.5f;
@@ -33,6 +36,8 @@ public class Config implements IModGuiFactory {
     public static boolean allowQuickAccessLeatherBag = true;
     public static boolean allowQuickAccessQuiver = true;
     public static int waterskinFixDelayTicks = 3;
+    public static boolean disableRottenFlesh = true;
+    public static boolean disableSpiderEyes = true;
 
     public static void initialize(String configDirectory) {
         if (config == null) {
@@ -45,10 +50,16 @@ public class Config implements IModGuiFactory {
     public static void load() {
         invertHotbarCycleDirection = config.getBoolean("Invert Scrolling Direction", Configuration.CATEGORY_GENERAL, false,
                 "\nIf set to true, scrolling the mouse wheel up will move you *down* one inventory row, otherwise scrolling up will move you *up*.\n\n");
-        //autoRefillTools = config.getBoolean("Auto-refill Tools", Configuration.CATEGORY_GENERAL, true,
-        //        "\nWhether to automatically swap in a new tool when the one you're using breaks - if you have a replacement in your inventory.\n\n");
-        //autoRefillBlocks = config.getBoolean("Auto-refill Blocks", Configuration.CATEGORY_GENERAL, true,
-        //        "\nWhether to automatically swap in a new stack of blocks when you up one - if you have some extra in your inventory.\n\n");
+        autoRefillTools = config.getBoolean("Auto-refill Tools", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to automatically swap in a new tool when the one you're using breaks - if you have a replacement in your inventory.\n\nExamples of tools are axes, saws, chisels, etc.\n\n");
+        autoRefillWeapons = config.getBoolean("Auto-refill Weapons", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to automatically swap in a new weapon when the one you're using breaks - if you have a replacement in your inventory.\n\nExamples of weapons are swords, maces, bows, etc.\n\n");
+        autoRefillBlocks = config.getBoolean("Auto-refill Blocks", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to automatically swap in a new stack of blocks when you use up one - if you have some extra in your inventory.\n\nExamples of blocks are wooden planks, smooth stone, dirt, etc.\n\n");
+        autoRefillFood = config.getBoolean("Auto-refill Food and Drinks", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to automatically swap in a new stack of food or drinks when you use one up - if you have some extra in your inventory.\n\nExamples of food and drinks are bread, sandwiches, meat, water jugs, milk, etc.\n\n");
+        autoRefillMisc = config.getBoolean("Auto-refill Misc. Items", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to automatically swap in a new stack of miscellaneous items when you use one up - if you have some extra in your inventory.\n\nExamples of misc items are flowers, clay, straw, leather, etc.\n\n");
         hotbarCyclePreviewTransparency = config.getFloat("Hotbar Preview Transparency", Configuration.CATEGORY_GENERAL, 0.6f, 0.0f, 1.0f,
                 "\nHow transparent the hotbar cycling preview slots will appear.\n\nThis doesn't affect the current hotbar row, only the preview rows.\n\n");
         hotbarCyclePreviewItemIconScale = config.getFloat("Hotbar Preview Item Icon Scale", Configuration.CATEGORY_GENERAL, 0.5f, 0.0f, 1.0f,
@@ -70,7 +81,12 @@ public class Config implements IModGuiFactory {
         allowQuickAccessQuiver = config.getBoolean("Allow Quick-Access on Quivers", Configuration.CATEGORY_GENERAL, true,
                 "\nWhether to allow right-clicking on a quiver to quickly access it from any inventory screen.\n\n");
         waterskinFixDelayTicks = config.getInt("Waterskin Fix Delay Ticks", Configuration.CATEGORY_GENERAL, 3, 0, 20,
-                "\nSince the waterskin fix might not always work depending on your exact setup, you can use this value to tweak it.\n\nLower values will try to fix the waterskin faster, but are less likely to work. Higher values have a higher chance to work but there might be a noticeable delay.\n\nSet this to 0 to disable the waterskin fix.\n\n");
+                "\nThe waterskin fix might not always work depending on your exact setup, you can tweak it here.\n\nLower values will try to fix the waterskin faster, but are less likely to work. Higher values have a higher chance to work but with a noticeable delay.\n\nSet this to 0 to disable the waterskin fix.\n\n");
+        disableRottenFlesh = config.getBoolean("Disable Rotten Flesh", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to disable rotten flesh drops from zombies. Rotten flesh has no in-game uses.\n\n");
+        disableSpiderEyes = config.getBoolean("Disable Spider Eyes", Configuration.CATEGORY_GENERAL, true,
+                "\nWhether to disable spider eye drops from spiders. Spider eyes have no in-game uses.\n\n");
+
 
         if (config.hasChanged())
             config.save();
@@ -107,7 +123,7 @@ public class Config implements IModGuiFactory {
                 QuickPockets.ID,
                 false,
                 false,
-                GuiConfig.getAbridgedConfigPath(Config.config.toString()));
+                "TFC+ Quick Pockets");
         }
     }
 }

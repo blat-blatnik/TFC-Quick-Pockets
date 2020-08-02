@@ -11,6 +11,9 @@ import com.dunk.tfc.GUI.*;
 import com.dunk.tfc.Handlers.Client.RenderOverlayHandler;
 import com.dunk.tfc.ItemSetup;
 import com.dunk.tfc.Items.*;
+import com.dunk.tfc.Items.ItemBlocks.ItemFlowers;
+import com.dunk.tfc.Items.ItemBlocks.ItemSapling;
+import com.dunk.tfc.Items.ItemCoal;
 import com.dunk.tfc.Items.Pottery.ItemPotterySmallVessel;
 import com.dunk.tfc.Items.Tools.*;
 import com.dunk.tfc.TerraFirmaCraft;
@@ -49,6 +52,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -67,6 +71,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -87,17 +92,20 @@ public class ClientStuff extends ClientAndServerStuff {
 
     public static Minecraft minecraft;
     public static RenderItem itemRenderer = new RenderItem();
-    public static boolean cyclingThroughInventory; // if this is false, then we're cycling through the hotbar
-    public static QuickSwapBinding currentSwapKey; // if this is null then we're not cycling at the moment
-    public static int cycleHotbarSlotIndex = -1;
-    public static int cycleLastSlotIndex = -1;
-    public static ItemStack[] lastCycleInventorySlots = new ItemStack[HOTBAR_SIZE + 3 * INVENTORY_ROW_SIZE];
+    public static ToolSwapBinding currentToolSwapKey; // if this is null then we're not cycling at the moment
+    public static int[] toolSwapList = new int[64];
+    public static int toolSwapListLength = 0;
+    public static int toolSwapCurrentIndex = -1;
+    public static int lastToolSwapSelectedSlot = -1;
+    public static ItemStack[] lastToolSwapInventorySlots = new ItemStack[HOTBAR_SIZE + 3 * INVENTORY_ROW_SIZE];
     public static int selectedSlotAtStartOfMouseInput = -1;
     public static int drinkSlotIndexPreUse = -1;
     public static int drinkSlotIndexPostUse = -1;
     public static Item drinkToFix = null;
     public static long drinkFixRemainingDelayTicks = -1;
     public static ItemStack[] inventoryDuringDrink = new ItemStack[HOTBAR_SIZE + 3 * INVENTORY_ROW_SIZE];
+    public static ItemStack lastHeldStack = null;
+    public static int lastSelectedItem = -1;
     public static Method syncCurrentPlayItem;
     public static Field remainingHighlightTicks;
 
@@ -129,36 +137,26 @@ public class ClientStuff extends ClientAndServerStuff {
     public static Field sluiceTE;
     public static Field horse;
 
-    public static KeyBinding swapHotbar = new KeyBinding("key.swapHotbar", Keyboard.KEY_LMENU,"key.categories.inventory");
-    public static QuickSwapBinding[] quickSwaps = {
-        // it seems like I can't use lambdas or I can't compile this thing.. oh well
-        new QuickSwapBinding("key.swapToSword", 0, "key.categories.inventory", new Predicate<Item>() {
-            @Override public boolean test(Item item) {
-                return ((ItemCustomSword) item).damageType == EnumDamageType.SLASHING;
-            }
-        }, ItemCustomSword.class),
-        new QuickSwapBinding("key.swapToMace", 0, "key.categories.inventory", new Predicate<Item>() {
-            @Override public boolean test(Item item) {
-                return ((ItemCustomSword) item).damageType == EnumDamageType.CRUSHING;
-            }
-        }, ItemCustomSword.class),
-        new QuickSwapBinding("key.swapToRanged", 0, "key.categories.inventory", ItemBow.class, ItemJavelin.class),
-        new QuickSwapBinding("key.swapToFood", 0, "key.categories.inventory", ItemFoodTFC.class),
-        new QuickSwapBinding("key.swapToWater", 0, "key.categories.inventory", ItemDrink.class),
-        new QuickSwapBinding("key.swapToPickaxe", 0, "key.categories.inventory", ItemPickaxe.class),
-        new QuickSwapBinding("key.swapToProPick", 0, "key.categories.inventory", ItemProPick.class),
-        new QuickSwapBinding("key.swapToAxe", 0, "key.categories.inventory", ItemAxe.class),
-        new QuickSwapBinding("key.swapToSaw", 0, "key.categories.inventory", ItemCustomSaw.class),
-        new QuickSwapBinding("key.swapToShovel", 0, "key.categories.inventory", ItemCustomShovel.class),
-        new QuickSwapBinding("key.swapToChisel", 0, "key.categories.inventory", ItemChisel.class),
-        new QuickSwapBinding("key.swapToHammer", 0, "key.categories.inventory", ItemHammer.class),
-        new QuickSwapBinding("key.swapToScythe", 0, "key.categories.inventory", ItemCustomScythe.class),
-        new QuickSwapBinding("key.swapToFireStarter", 0, "key.categories.inventory", ItemFirestarter.class, ItemFlintAndSteel.class),
-        new QuickSwapBinding("key.swapToKnife", 0, "key.categories.inventory", ItemKnife.class),
-        new QuickSwapBinding("key.swapToHoe", 0, "key.categories.inventory", ItemHoe.class),
-        new QuickSwapBinding("key.swapToTrowel", 0, "key.categories.inventory", ItemTrowel.class),
-        new QuickSwapBinding("key.swapToStaff", 0, "key.categories.inventory", ItemStaff.class),
-        new QuickSwapBinding("key.swapToFishingRod", 0, "key.categories.inventory", ItemFishingRod.class),
+    public static KeyBinding cycleHotbar = new KeyBinding("key.swapHotbar", Keyboard.KEY_LMENU,"key.categories.inventory");
+    public static ToolSwapBinding[] quickToolSwaps = {
+        new ToolSwapBinding("key.swapToSword", 0, "key.categories.inventory", ItemCategory.SWORD),
+        new ToolSwapBinding("key.swapToRanged", 0, "key.categories.inventory", ItemCategory.BOW, ItemCategory.JAVELIN),
+        new ToolSwapBinding("key.swapToFood", 0, "key.categories.inventory", ItemCategory.FOOD),
+        new ToolSwapBinding("key.swapToWater", 0, "key.categories.inventory", ItemCategory.DRINK),
+        new ToolSwapBinding("key.swapToPickaxe", 0, "key.categories.inventory", ItemCategory.PICKAXE),
+        new ToolSwapBinding("key.swapToProPick", 0, "key.categories.inventory", ItemCategory.PRO_PICK),
+        new ToolSwapBinding("key.swapToAxe", 0, "key.categories.inventory", ItemCategory.AXE),
+        new ToolSwapBinding("key.swapToSaw", 0, "key.categories.inventory", ItemCategory.SAW),
+        new ToolSwapBinding("key.swapToShovel", 0, "key.categories.inventory", ItemCategory.SHOVEL),
+        new ToolSwapBinding("key.swapToChisel", 0, "key.categories.inventory", ItemCategory.CHISEL),
+        new ToolSwapBinding("key.swapToHammer", 0, "key.categories.inventory", ItemCategory.HAMMER),
+        new ToolSwapBinding("key.swapToScythe", 0, "key.categories.inventory", ItemCategory.SCYTHE),
+        new ToolSwapBinding("key.swapToFireStarter", 0, "key.categories.inventory", ItemCategory.FIRE_STARTER),
+        new ToolSwapBinding("key.swapToKnife", 0, "key.categories.inventory", ItemCategory.KNIFE),
+        new ToolSwapBinding("key.swapToHoe", 0, "key.categories.inventory", ItemCategory.HOE),
+        new ToolSwapBinding("key.swapToTrowel", 0, "key.categories.inventory", ItemCategory.TROWEL),
+        new ToolSwapBinding("key.swapToStaff", 0, "key.categories.inventory", ItemCategory.STAFF),
+        new ToolSwapBinding("key.swapToFishingRod", 0, "key.categories.inventory", ItemCategory.FISHING_ROD),
     };
 
     @Override
@@ -174,8 +172,8 @@ public class ClientStuff extends ClientAndServerStuff {
 
         minecraft = Minecraft.getMinecraft();
 
-        ClientRegistry.registerKeyBinding(swapHotbar);
-        for (QuickSwapBinding swapBinding : quickSwaps) {
+        ClientRegistry.registerKeyBinding(cycleHotbar);
+        for (ToolSwapBinding swapBinding : quickToolSwaps) {
             ClientRegistry.registerKeyBinding(swapBinding);
         }
 
@@ -218,9 +216,10 @@ public class ClientStuff extends ClientAndServerStuff {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void doQuickToolSwap(InputEvent.KeyInputEvent event) {
-        for (QuickSwapBinding swapKey : quickSwaps) {
-            if (swapKey.isPressed()) {
-                cycleToolIntoHotbarSlot(swapKey);
+        for (ToolSwapBinding swapKeyBind : quickToolSwaps) {
+            if (swapKeyBind.isPressed()) {
+                swapToolIntoHotbarSlot(swapKeyBind);
+                break;
             }
         }
     }
@@ -234,7 +233,7 @@ public class ClientStuff extends ClientAndServerStuff {
     public void cycleThroughInventoryRowsOnMouseScroll(InputEvent.MouseInputEvent event) {
         int delta = Mouse.getEventDWheel();
         if (delta != 0) {
-            if (swapHotbar.getIsKeyPressed()) {
+            if (cycleHotbar.getIsKeyPressed()) {
                 if (Config.invertHotbarCycleDirection)
                     delta = -delta;
 
@@ -245,40 +244,9 @@ public class ClientStuff extends ClientAndServerStuff {
     }
 
     @SubscribeEvent @SuppressWarnings("unused")
-    public void autoFillWhenPlayerDestroysItem(PlayerDestroyItemEvent event) {
-        if (event.entityPlayer != null && event.original != null) {
-            ItemStack original = event.original;
-
-            ItemStack closestMatch = findClosestMatchingStack(original);
-            if (closestMatch != null && closestMatch != original) {
-
-                int indexOriginal = -1;
-                int indexClosestMatch = -1;
-
-                ItemStack[] inventory = event.entityPlayer.inventory.mainInventory;
-                for (int i = 0; i < inventory.length; ++i) {
-                    if (inventory[i] == original)
-                        indexOriginal = i;
-                    if (inventory[i] == closestMatch)
-                        indexClosestMatch = i;
-                }
-
-                if (indexOriginal < 0)
-                    indexOriginal = event.entityPlayer.inventory.currentItem;
-
-                if (indexOriginal >= 0 && indexClosestMatch >= 0 && indexOriginal != indexClosestMatch) {
-                    int slot1 = convertInventoryIndexToSlotIndex(indexOriginal);
-                    int slot2 = convertInventoryIndexToSlotIndex(indexClosestMatch);
-                    //sendSwapPlayerInventorySlotsToServer(slot1, slot2);
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent @SuppressWarnings("unused")
     public void makeGUIsHaveQuickContainerAccess(GuiOpenEvent event) {
         if (event.gui instanceof GuiContainer) {
-            stopCyclingToolsInHotbarSlot();
+            stopSwappingToolsInHotbarSlot();
 
             GuiContainer gui = (GuiContainer) event.gui;
             Container slots = gui.inventorySlots;
@@ -428,7 +396,7 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent(priority=EventPriority.HIGH) @SuppressWarnings("unused")
     public void drawInventoryPreviewAndStopTFCFromDrawingGUI(RenderGameOverlayEvent.Pre event) {
-        if (swapHotbar.getIsKeyPressed()) {
+        if (cycleHotbar.getIsKeyPressed()) {
             int width = event.resolution.getScaledWidth();
             int height = event.resolution.getScaledHeight();
             switch (event.type) {
@@ -457,7 +425,7 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent @SuppressWarnings("unused")
     public void drawChatOverlayAboveInventoryPreview(RenderGameOverlayEvent.Chat event) {
-        if (swapHotbar.getIsKeyPressed()) {
+        if (cycleHotbar.getIsKeyPressed()) {
             event.posY -= 32;
         }
     }
@@ -570,23 +538,123 @@ public class ClientStuff extends ClientAndServerStuff {
     }
 
     @SubscribeEvent @SuppressWarnings("unused")
-    public void putWaterskinInProperSlotAfterUse(TickEvent.ClientTickEvent event) {
-        if (Config.waterskinFixDelayTicks > 0 && event.phase == TickEvent.Phase.END && minecraft.thePlayer != null) {
-            ItemStack[] inventory = minecraft.thePlayer.inventory.mainInventory;
-            if (drinkToFix != null && drinkSlotIndexPreUse >= 0 && drinkSlotIndexPostUse >= 0) {
-                if (--drinkFixRemainingDelayTicks == 0) {
-                    ItemStack preDrink = inventory[drinkSlotIndexPreUse];
-                    ItemStack postDrink = inventory[drinkSlotIndexPostUse];
-                    if (preDrink == null && postDrink != null && postDrink.getItem() == drinkToFix) {
-                        int slot1 = convertInventoryIndexToSlotIndex(drinkSlotIndexPreUse);
-                        int slot2 = convertInventoryIndexToSlotIndex(drinkSlotIndexPostUse);
-                        sendSwapPlayerInventorySlotsToServer(slot1, slot2);
-                        inventory[drinkSlotIndexPreUse].animationsToGo = 0;
+    public void doAutoRefillAndFixWaterskin(TickEvent.ClientTickEvent event) {
+        if (minecraft.thePlayer != null) {
+
+            if (event.phase == TickEvent.Phase.START) {
+
+                checkIfNeedToDoAutoFill();
+
+            } else if (event.phase == TickEvent.Phase.END) {
+
+                if (Config.waterskinFixDelayTicks > 0) {
+                    ItemStack[] inventory = minecraft.thePlayer.inventory.mainInventory;
+
+                    if (drinkToFix != null && drinkSlotIndexPreUse >= 0 && drinkSlotIndexPostUse >= 0) {
+                        if (--drinkFixRemainingDelayTicks == 0) {
+
+                            ItemStack preDrink = inventory[drinkSlotIndexPreUse];
+                            ItemStack postDrink = inventory[drinkSlotIndexPostUse];
+
+                            if (preDrink == null && postDrink != null && postDrink.getItem() == drinkToFix) {
+
+                                int slot1 = convertInventoryIndexToSlotIndex(drinkSlotIndexPreUse);
+                                int slot2 = convertInventoryIndexToSlotIndex(drinkSlotIndexPostUse);
+                                sendSwapPlayerInventorySlotsToServer(slot1, slot2);
+                                inventory[drinkSlotIndexPreUse].animationsToGo = 0;
+                            }
+
+                            drinkSlotIndexPreUse = -1;
+                            drinkSlotIndexPostUse = -1;
+                            drinkToFix = null;
+                        }
                     }
-                    drinkSlotIndexPreUse = -1;
-                    drinkSlotIndexPostUse = -1;
-                    drinkToFix = null;
                 }
+
+                checkIfNeedToDoAutoFill();
+            }
+        }
+    }
+
+    public static void checkIfNeedToDoAutoFill() {
+        if (minecraft.thePlayer != null) {
+
+            InventoryPlayer playerInventory = minecraft.thePlayer.inventory;
+
+            if (playerInventory != null) {
+
+                int currentSelectedItem = playerInventory.currentItem;
+                ItemStack[] inventory = playerInventory.mainInventory;
+                ItemStack currentHeldStack = inventory[playerInventory.currentItem];
+
+                if (lastSelectedItem == currentSelectedItem) {
+
+                    boolean heldItemSuddenlyChanged =
+                            (lastHeldStack != null && currentHeldStack == null) ||
+                            (lastHeldStack != null && lastHeldStack.getItem() != currentHeldStack.getItem());
+
+                    if (heldItemSuddenlyChanged) {
+                        GameSettings settings = minecraft.gameSettings;
+
+                        boolean itWasBecauseHeldItemGotUsedOrDestroyed =
+                                minecraft.currentScreen == null && !settings.keyBindDrop.getIsKeyPressed() &&
+                                (settings.keyBindAttack.getIsKeyPressed() || settings.keyBindUseItem.getIsKeyPressed());
+
+                        if (itWasBecauseHeldItemGotUsedOrDestroyed) {
+
+                            ItemCategory category = ItemCategory.get(lastHeldStack.getItem());
+                            int broad = category.getBroadCategoryFlags();
+
+                            boolean doRefill = false;
+                            if ((broad & ItemCategory.TOOL_FLAG) != 0 && Config.autoRefillTools)
+                                doRefill = true;
+                            else if ((broad & ItemCategory.WEAPON_FLAG) != 0 && Config.autoRefillWeapons)
+                                doRefill = true;
+                            else if ((broad & ItemCategory.FOOD_FLAG) != 0 && Config.autoRefillFood)
+                                doRefill = true;
+                            else if ((broad & ItemCategory.BLOCK_FLAG) != 0 && Config.autoRefillBlocks)
+                                doRefill = true;
+                            else if ((broad & ItemCategory.MISC_FLAG) != 0 && Config.autoRefillMisc)
+                                doRefill = true;
+
+                            if (doRefill) {
+                                //System.err.printf("\nAuto refilling %s in slot with %s\n", lastHeldStack, currentHeldStack);
+                                doAutoRefill(lastHeldStack);
+                            }
+                        }
+                    }
+                }
+
+                lastSelectedItem = currentSelectedItem;
+                lastHeldStack = currentHeldStack;
+            }
+        }
+    }
+
+    public static void doAutoRefill(ItemStack originalStack) {
+        ItemStack closestMatch = findClosestMatchingStack(originalStack);
+        if (closestMatch != null && closestMatch != originalStack) {
+
+            EntityPlayer player = minecraft.thePlayer;
+
+            int indexOriginal = -1;
+            int indexClosestMatch = -1;
+
+            ItemStack[] inventory = player.inventory.mainInventory;
+            for (int i = 0; i < inventory.length; ++i) {
+                if (inventory[i] == originalStack)
+                    indexOriginal = i;
+                if (inventory[i] == closestMatch)
+                    indexClosestMatch = i;
+            }
+
+            if (indexOriginal < 0)
+                indexOriginal = player.inventory.currentItem;
+
+            if (indexOriginal >= 0 && indexClosestMatch >= 0 && indexOriginal != indexClosestMatch) {
+                int slot1 = convertInventoryIndexToSlotIndex(indexOriginal);
+                int slot2 = convertInventoryIndexToSlotIndex(indexClosestMatch);
+                sendSwapPlayerInventorySlotsToServer(slot1, slot2);
             }
         }
     }
@@ -596,7 +664,7 @@ public class ClientStuff extends ClientAndServerStuff {
         ItemStack[] sorted = new ItemStack[inventory.length];
         System.arraycopy(inventory, 0, sorted, 0, inventory.length);
 
-        //TODO: This is for debugging purposes onlys
+        //TODO: This is for debugging purposes only
         int[] similarity = new int[inventory.length];
         for (int i = 0; i < inventory.length; ++i)
             similarity[i] = getStackSimilarity(target, inventory[i]);
@@ -628,102 +696,103 @@ public class ClientStuff extends ClientAndServerStuff {
             Item item2 = b.getItem();
             ItemCategory category1 = ItemCategory.get(item1);
             ItemCategory category2 = ItemCategory.get(item2);
-            //Class<? extends Item> class1 = item1.getClass();
-            //Class<? extends Item> class2 = item2.getClass();
 
             int similarity = 0;
             if (item1 == item2 || item1.getUnlocalizedName().equals(item2.getUnlocalizedName()))
                 similarity += 1;
             if (category1 == ItemCategory.OTHER && category2 == ItemCategory.OTHER && a.getItemDamage() != b.getItemDamage())
                 similarity -= 1;
-            if (category1.isSame(category2))
+            if (category1.matches(category2))
                 similarity += 1;
 
             return similarity;
         }
     }
 
-    //TODO: This can probably be done way more simply, by building a list to cycle through
-    public static void cycleToolIntoHotbarSlot(QuickSwapBinding swapKey) {
+    public static void swapToolIntoHotbarSlot(ToolSwapBinding swapKey) {
         boolean canExecute =
                 swapKey != null &&
-                        minecraft != null &&
-                        minecraft.thePlayer != null &&
-                        minecraft.thePlayer.inventory != null &&
-                        minecraft.thePlayer.inventory.mainInventory != null;
+                minecraft != null &&
+                minecraft.thePlayer != null &&
+                minecraft.thePlayer.inventory != null &&
+                minecraft.thePlayer.inventory.mainInventory != null;
 
         if (canExecute) {
-            InventoryPlayer inventory = minecraft.thePlayer.inventory;
-            ItemStack[] inventorySlots = inventory.mainInventory;
-            int selectedSlot = inventory.currentItem;
 
-            boolean cycleAgain = true;
-            while(cycleAgain) {
-                cycleAgain = false;
+            InventoryPlayer playerInventory = minecraft.thePlayer.inventory;
+            ItemStack[] inventory = playerInventory.mainInventory;
+            int selectedSlot = playerInventory.currentItem;
 
-                boolean startFromScratch =
-                        swapKey != currentSwapKey ||
-                                (cyclingThroughInventory && selectedSlot != cycleHotbarSlotIndex) ||
-                                (!cyclingThroughInventory && selectedSlot != cycleLastSlotIndex) ||
-                                !arrayShallowEquals(inventorySlots, lastCycleInventorySlots);
+            if (swapKey != currentToolSwapKey || selectedSlot != lastToolSwapSelectedSlot || !itemStacksHaveTheSameItems(lastToolSwapInventorySlots, inventory)) {
+                stopSwappingToolsInHotbarSlot();
+            }
 
-                if (startFromScratch) {
-                    stopCyclingToolsInHotbarSlot();
-                    currentSwapKey = swapKey;
-                    cycleHotbarSlotIndex = selectedSlot;
-                    cycleLastSlotIndex = selectedSlot;
+            if (toolSwapCurrentIndex == -1) {
+
+                // rebuild the toolCycleList
+
+                toolSwapCurrentIndex = 0;
+                toolSwapListLength = 0;
+                toolSwapList[toolSwapListLength++] = selectedSlot;
+
+                for (int i = selectedSlot + 1; i < HOTBAR_SIZE; ++i)
+                    if (swapKey.slotMatches(inventory[i]))
+                        toolSwapList[toolSwapListLength++] = i;
+
+                for (int i = 0; i < selectedSlot; ++i)
+                    if (swapKey.slotMatches(inventory[i]))
+                        toolSwapList[toolSwapListLength++] = i;
+
+                if (toolSwapListLength > 1)
+                    toolSwapList[toolSwapListLength++] = selectedSlot;
+
+                for (int i = inventory.length - 1; i >= HOTBAR_SIZE; --i)
+                    if (swapKey.slotMatches(inventory[i]))
+                        toolSwapList[toolSwapListLength++] = i;
+
+                if (toolSwapListLength > 1 && toolSwapList[0] == toolSwapList[toolSwapListLength - 1])
+                    toolSwapListLength--;
+
+                if (toolSwapListLength >= toolSwapList.length) { // sanity check
+                    stopSwappingToolsInHotbarSlot();
+                    return;
+                }
+            }
+
+            currentToolSwapKey = swapKey;
+            int lastIndex = toolSwapList[toolSwapCurrentIndex];
+            toolSwapCurrentIndex = (toolSwapCurrentIndex + 1) % toolSwapListLength;
+            int nextIndex = toolSwapList[toolSwapCurrentIndex];
+
+            if (lastIndex >= HOTBAR_SIZE) {
+                int firstIndex = toolSwapList[0];
+                int slot1 = convertInventoryIndexToSlotIndex(firstIndex);
+                int slot2 = convertInventoryIndexToSlotIndex(lastIndex);
+                sendSwapPlayerInventorySlotsToServer(slot1, slot2);
+            }
+
+            if (nextIndex < 0 || nextIndex >= inventory.length) {
+                stopSwappingToolsInHotbarSlot();
+            } else {
+                if (nextIndex >= HOTBAR_SIZE) {
+                    int slot1 = convertInventoryIndexToSlotIndex(nextIndex);
+                    int slot2 = convertInventoryIndexToSlotIndex(selectedSlot);
+                    sendSwapPlayerInventorySlotsToServer(slot1, slot2);
+                    nextIndex = selectedSlot;
                 }
 
-                if (cyclingThroughInventory) {
-                    if (cycleLastSlotIndex < HOTBAR_SIZE) { // check if we just stated to cycle through inventory.
-                        cycleLastSlotIndex = HOTBAR_SIZE - 1;
-                    } else {
-                        sendSwapPlayerInventorySlotsToServer(cycleHotbarSlotIndex + 3 * INVENTORY_ROW_SIZE, cycleLastSlotIndex - HOTBAR_SIZE);
-                    }
-                    int nextIndex = swapKey.findMatchingSlotIndexInInventory(inventorySlots, cycleLastSlotIndex + 1);
-                    if (nextIndex < 0) {
-                        // Cycle through hotbar next time through.
-                        cyclingThroughInventory = false;
-                        cycleLastSlotIndex = cycleHotbarSlotIndex;
-                    } else {
-                        sendSwapPlayerInventorySlotsToServer(cycleHotbarSlotIndex + 3 * INVENTORY_ROW_SIZE, nextIndex - HOTBAR_SIZE);
-                        cycleLastSlotIndex = nextIndex;
-                    }
-                } else {
-                    int nextIndex = swapKey.findMatchingSlotIndexInHotbar(inventorySlots, cycleLastSlotIndex);
-                    if (nextIndex < 0 || (nextIndex >= cycleHotbarSlotIndex && nextIndex < cycleLastSlotIndex)) {
-                        // Cycle through inventory next time through.
-                        setCurrentPlayerItem(cycleHotbarSlotIndex);
-                        int nextIndexInInventory = swapKey.findMatchingSlotIndexInInventory(inventorySlots, HOTBAR_SIZE - 1);
-                        if (nextIndexInInventory != -1) {
-                            cyclingThroughInventory = true;
-                            if (cycleLastSlotIndex == cycleHotbarSlotIndex) {
-                                // If this is the first time we try to cycle, and we didn't find anything
-                                // then just immediately try to cycle through the inventory.
-                                cycleAgain = true;
-                            } else {
-                                cycleLastSlotIndex = cycleHotbarSlotIndex;
-                            }
-                        } else {
-                            cycleLastSlotIndex = cycleHotbarSlotIndex;
-                        }
-                    } else {
-                        setCurrentPlayerItem(nextIndex);
-                        cycleLastSlotIndex = nextIndex;
-                    }
-                }
-
-                System.arraycopy(inventorySlots, 0, lastCycleInventorySlots, 0, inventorySlots.length);
-
+                setCurrentPlayerItem(nextIndex);
+                lastToolSwapSelectedSlot = nextIndex;
+                System.arraycopy(inventory, 0, lastToolSwapInventorySlots, 0, inventory.length);
             }
         }
     }
 
-    public static void stopCyclingToolsInHotbarSlot() {
-        cyclingThroughInventory = false;
-        currentSwapKey = null;
-        cycleHotbarSlotIndex = -1;
-        cycleLastSlotIndex = -1;
+    public static void stopSwappingToolsInHotbarSlot() {
+        toolSwapCurrentIndex = -1;
+        lastToolSwapSelectedSlot = -1;
+        toolSwapListLength = 0;
+        currentToolSwapKey = null;
     }
 
     public static void setCurrentPlayerItem(int index) {
@@ -1082,13 +1151,16 @@ public class ClientStuff extends ClientAndServerStuff {
         }
     }
 
-    public static <T> boolean arrayShallowEquals(T[] a, T[] b) {
+    public static boolean itemStacksHaveTheSameItems(ItemStack[] a, ItemStack[] b) {
         if (a.length != b.length)
             return false;
         else {
-            for (int i = 0; i < a.length; ++i)
-                if (a[i] != b[i])
+            for (int i = 0; i < a.length; ++i) {
+                if ((a[i] == null) != (b[i] == null))
                     return false;
+                else if (a[i] != null && a[i].getItem() != b[i].getItem())
+                    return false;
+            }
             return true;
         }
     }
@@ -1113,26 +1185,37 @@ public class ClientStuff extends ClientAndServerStuff {
         SHOVEL,
         SCYTHE,
         TROWEL,
+        PLASTER_BUCKET,
         SHEARS,
         FIRE_STARTER,
         FISHING_ROD,
         SEEDS,
+        SAPLING,
         ROCK,
         ROCK_FLAKE,
+        COAL,
         CLAY,
         STRAW,
         LOG,
         CONTAINER,
+        FLOWERS,
+        BLOCK,
         OTHER;
+
+        public static int FOOD_FLAG     = 1 << 0;
+        public static int TOOL_FLAG     = 1 << 1;
+        public static int WEAPON_FLAG   = 1 << 2;
+        public static int BLOCK_FLAG    = 1 << 3;
+        public static int MISC_FLAG     = 1 << 4;
 
         public static ItemCategory get(Item item) {
             if (item == null)
                 return ItemCategory.NONE;
-            else  if (item instanceof ItemCustomSword) {
-                    if (((ItemCustomSword)item).damageType == EnumDamageType.CRUSHING)
-                        return ItemCategory.MACE;
-                    else
-                        return ItemCategory.SWORD;
+            else if (item instanceof ItemCustomSword) {
+                if (((ItemCustomSword) item).damageType == EnumDamageType.CRUSHING)
+                    return ItemCategory.MACE;
+                else
+                    return ItemCategory.SWORD;
             } else if (item instanceof ItemCustomBow) {
                 return ItemCategory.BOW;
             } else if (item instanceof ItemJavelin) {
@@ -1177,6 +1260,8 @@ public class ClientStuff extends ClientAndServerStuff {
                 return ItemCategory.ROCK_FLAKE;
             } else if (item instanceof ItemLogs || item instanceof ItemThickLogs) {
                 return ItemCategory.LOG;
+            } else if (item instanceof ItemSapling || item instanceof ItemFruitTreeSapling) {
+                return ItemCategory.SAPLING;
             } else if (item instanceof ItemCustomSeeds) {
                 return ItemCategory.SEEDS;
             } else if (item instanceof ItemClay) {
@@ -1185,106 +1270,80 @@ public class ClientStuff extends ClientAndServerStuff {
                 return ItemCategory.ROCK;
             } else if (item instanceof ItemHoe) {
                 return ItemCategory.HOE;
+            } else if (item instanceof ItemPlasterBucket) {
+                return ItemCategory.PLASTER_BUCKET;
+            } else if (item instanceof ItemCoal) {
+                return ItemCategory.COAL;
+            } else if (item instanceof ItemFlowers) {
+                return ItemCategory.FLOWERS;
+            } else if (item instanceof ItemBlock) {
+                return ItemCategory.BLOCK;
             } else {
                 return ItemCategory.OTHER;
             }
         }
 
-        public boolean isSame(ItemCategory other) {
-            if (this == NONE || other == NONE || this == OTHER || other == OTHER)
+        public boolean matches(ItemCategory other) {
+            if (this == NONE || other == NONE || this == OTHER || other == OTHER || this == BLOCK || other == BLOCK)
                 return false;
             else
                 return this == other;
         }
 
-        public boolean isTool() {
+        public int getBroadCategoryFlags() {
             switch (this) {
-                case FOOD:
-                case DRINK:
-                case SWORD:
-                case MACE:
-                case STAFF:
-                case BOW:
-                case JAVELIN:
                 case AXE:
+                case KNIFE:
+                case HAMMER:
+                    return WEAPON_FLAG | TOOL_FLAG;
                 case SAW:
                 case HOE:
                 case PICKAXE:
                 case PRO_PICK:
-                case KNIFE:
                 case CHISEL:
-                case HAMMER:
                 case SHOVEL:
                 case SCYTHE:
                 case TROWEL:
                 case SHEARS:
                 case FIRE_STARTER:
                 case FISHING_ROD:
-                    return true;
-                default:
-                case NONE:
-                case OTHER:
-                case STRAW:
-                case LOG:
-                case ROCK:
-                case ROCK_FLAKE:
-                case CONTAINER:
-                case SEEDS:
-                case CLAY:
-                    return false;
-            }
-        }
-
-        public boolean isBlock() {
-            switch (this) {
-                case NONE:
-                case OTHER:
-                case STRAW:
-                case LOG:
-                case ROCK:
-                case ROCK_FLAKE:
-                case CONTAINER:
-                case SEEDS:
-                case CLAY:
-                    return true;
+                case PLASTER_BUCKET:
+                    return TOOL_FLAG;
                 case FOOD:
                 case DRINK:
-                case SWORD:
-                case MACE:
-                case STAFF:
-                case BOW:
-                case JAVELIN:
-                case AXE:
-                case SAW:
-                case HOE:
-                case PICKAXE:
-                case PRO_PICK:
-                case KNIFE:
-                case CHISEL:
-                case HAMMER:
-                case SHOVEL:
-                case SCYTHE:
-                case TROWEL:
-                case SHEARS:
-                case FIRE_STARTER:
-                case FISHING_ROD:
+                    return FOOD_FLAG;
+                case LOG:
+                case ROCK:
+                case ROCK_FLAKE:
+                case CONTAINER:
+                case SEEDS:
+                case SAPLING:
+                case CLAY:
+                case STRAW:
+                case COAL:
+                case FLOWERS:
+                case OTHER:
+                    return MISC_FLAG;
+                case BLOCK:
+                    return BLOCK_FLAG;
+                case NONE:
                 default:
-                    return false;
+                    return 0;
             }
         }
     }
 
-    public static class QuickSwapBinding extends KeyBinding {
-        public final Class<? extends Item>[] categories;
+    public static class ToolSwapBinding extends KeyBinding {
+        public final ItemCategory[] categories;
         public final Predicate<Item> filter;
 
-        public QuickSwapBinding(String name, int keycode, String category, Predicate<Item> additionalFilter, Class<? extends Item>... swapCategories) {
+        public ToolSwapBinding(String name, int keycode, String category, Predicate<Item> additionalFilter, ItemCategory... swapCategories) {
             super(name, keycode, category);
             categories = swapCategories;
             filter = additionalFilter;
         }
 
-        public QuickSwapBinding(String name, int keycode, String category, Class<? extends Item>... swapCategories) {
+        public ToolSwapBinding(String name, int keycode, String category, ItemCategory... swapCategories) {
             this(name, keycode, category, null, swapCategories);
         }
 
@@ -1312,9 +1371,10 @@ public class ClientStuff extends ClientAndServerStuff {
 
         public boolean slotMatches(ItemStack slot) {
             if (slot != null) {
-                for (Class<?> category : categories) {
-                    Item item = slot.getItem();
-                    if (category.isInstance(item)) {
+                Item item = slot.getItem();
+                ItemCategory slotCategory = ItemCategory.get(item);
+                for (ItemCategory matchCategory : categories) {
+                    if (matchCategory.matches(slotCategory)) {
                         if (filter == null || filter.test(item)) {
                             return true;
                         }
