@@ -18,6 +18,12 @@ This mod tackles this issue by allowing you to swap items in your hotbar without
 
 While holding <kbd>ALT</kbd> you can then <kbd>SCROLL UP</kbd> or <kbd>SCROLL DOWN</kbd> to swap the items in your hotbar, giving you quick and convenient access to your whole inventory.
 
+### Auto-Refill
+
+You're chopping a tree, and your axe suddenly breaks. Aw snap - well thankfully you've come prepared! You have another axe in your inventory just for situations like this. But now you have to open up the inventory menu and swap it into your hand - completely breaking your tree-cutting flow. Not anymore.
+
+With the auto-feature enabled, whenever you break a tool, a new one will be placed into your hand - provided you have a backup in your inventory to begin with. This also works for weapons, food, drinks, building blocks, as well as other items like stone flakes, flowers, etc.
+
 ### Quick Bag Access
 
 Moving items to and from vessels and leather bags can be very tedious, as you first have to open up your inventory, drop the first bag in your hotbar, close the menu, right click on the bag from your hotbar, move the items from the bag to your inventory, then open up your inventory again, move the second bag to the hotbar, right click on the second bag...
@@ -56,6 +62,15 @@ The basket and large vessel inventory screens hava a small inconsistency on thei
   <img width="796" height="172" src="screenshots/gui-fixes.png">
 </p>
 
+### No Useless Drops
+
+<p align="left">
+  <img align="left" width="60" height="60" src="screenshots/spider-eye.png">
+  <img align="right" width="60" height="60" src="screenshots/rotten-flesh.png">
+  
+  Spider eyes and rotten flesh have absolutely no use in TFC+. Their only purpose for existing is to bog down your inventory - well not anymore. This mod stops rotten flesh and spider eyes from spawning.
+</p>
+
 ## Requirements
 
 This mod is build as an addon for TerraFirmaCraft+, a minecraft mod which you can download [here](https://www.curseforge.com/minecraft/mc-mods/terrafirmacraftplus/files) if you haven't already. It was tested and working with TFC+ versions 0.84.1, 0.85, 0.85.1, however it should also work with newer versions as long as they don't change the GUI too much.
@@ -83,7 +98,5 @@ After it has finished, the mod you built should be in the `./build/libs/` direct
 Download the latest version [here](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases). 
 
 Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1, 0.85, 0.85.1. 
-
-This is a _client side_ only mod, so you should install it locally if you're playing on a server. Please note that using this mod might be considered cheating on some servers - so you could get banned for using it without permission. _Please make sure the server administrators are ok with you using this mod_.
 
 **Note** the mod is currently in beta. It was not tested extensively yet and so some problems could have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
