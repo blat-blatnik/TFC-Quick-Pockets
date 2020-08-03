@@ -1,3 +1,6 @@
+// This code is in the public domain. You can do anything you want with it, and you don't even
+// have to give credits if you don't feel like it, although that would obviously be appreciated.
+
 package tfcquickpockets;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;

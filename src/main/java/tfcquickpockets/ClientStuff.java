@@ -1,3 +1,6 @@
+// This code is in the public domain. You can do anything you want with it, and you don't even
+// have to give credits if you don't feel like it, although that would obviously be appreciated.
+
 package tfcquickpockets;
 
 import com.dunk.tfc.Core.Player.BodyTempStats;
@@ -8,6 +11,7 @@ import com.dunk.tfc.Core.TFC_Time;
 import com.dunk.tfc.Entities.Mobs.EntityHorseTFC;
 import com.dunk.tfc.Food.ItemFoodTFC;
 import com.dunk.tfc.GUI.*;
+import com.dunk.tfc.GUI.GuiHopper;
 import com.dunk.tfc.Handlers.Client.RenderOverlayHandler;
 import com.dunk.tfc.ItemSetup;
 import com.dunk.tfc.Items.*;
@@ -38,10 +42,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiIngame;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -69,9 +70,7 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
-import net.minecraftforge.event.world.BlockEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -170,6 +169,8 @@ public class ClientStuff extends ClientAndServerStuff {
     public void initialize(FMLInitializationEvent event) {
         super.initialize(event);
 
+        KeyBinding.unPressAllKeys();
+
         minecraft = Minecraft.getMinecraft();
 
         ClientRegistry.registerKeyBinding(cycleHotbar);
@@ -213,8 +214,7 @@ public class ClientStuff extends ClientAndServerStuff {
         horse = loadField(GuiScreenHorseInventoryTFC.class, "horse");
     }
 
-    @SubscribeEvent
-    @SuppressWarnings("unused")
+    @SubscribeEvent @SuppressWarnings("unused")
     public void doQuickToolSwap(InputEvent.KeyInputEvent event) {
         for (ToolSwapBinding swapKeyBind : quickToolSwaps) {
             if (swapKeyBind.isPressed()) {
@@ -543,6 +543,37 @@ public class ClientStuff extends ClientAndServerStuff {
 
             if (event.phase == TickEvent.Phase.START) {
 
+                if (allowWalkInInventoryScreen(minecraft.currentScreen)) {
+                    GameSettings settings = minecraft.gameSettings;
+
+                    int forward = settings.keyBindForward.getKeyCode();
+                    int back = settings.keyBindBack.getKeyCode();
+                    int left = settings.keyBindLeft.getKeyCode();
+                    int right = settings.keyBindRight.getKeyCode();
+
+                    KeyBinding.setKeyBindState(forward, Keyboard.isKeyDown(forward));
+                    KeyBinding.setKeyBindState(back, Keyboard.isKeyDown(back));
+                    KeyBinding.setKeyBindState(left, Keyboard.isKeyDown(left));
+                    KeyBinding.setKeyBindState(right, Keyboard.isKeyDown(right));
+
+                    KeyBinding.onTick(forward);
+                    KeyBinding.onTick(back);
+                    KeyBinding.onTick(left);
+                    KeyBinding.onTick(right);
+
+                    if (Config.allowJumpingInInventory) {
+                        int jump = settings.keyBindJump.getKeyCode();
+                        KeyBinding.setKeyBindState(jump, Keyboard.isKeyDown(jump));
+                        KeyBinding.onTick(jump);
+                    }
+
+                    if (Config.allowSprintingInInventory) {
+                        int sprint = settings.keyBindSprint.getKeyCode();
+                        KeyBinding.setKeyBindState(sprint, Keyboard.isKeyDown(sprint));
+                        KeyBinding.onTick(sprint);
+                    }
+                }
+
                 checkIfNeedToDoAutoFill();
 
             } else if (event.phase == TickEvent.Phase.END) {
@@ -821,6 +852,10 @@ public class ClientStuff extends ClientAndServerStuff {
             swapPlayerInventorySlots(minecraft.thePlayer, slot1, slot2);
             network.sendToServer(new SwapInventorySlotsPacket(slot1, slot2));
         }
+    }
+
+    public static boolean allowWalkInInventoryScreen(GuiScreen screen) {
+        return Config.allowWalkInInventory && (screen instanceof GuiInventoryTFC || screen instanceof ContainerGUIWithFastBagAccess);
     }
 
     public static void sendCycleInventoryRowsToServer(boolean cycleUp) {
@@ -1396,6 +1431,12 @@ public class ClientStuff extends ClientAndServerStuff {
         }
 
         @Override
+        public void drawWorldBackground(int p_146270_1_) {
+            if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory)
+                super.drawWorldBackground(p_146270_1_);
+        }
+
+        @Override
         public void drawGuiContainerBackgroundLayer(float mystery, int mouseX, int mouseY) {
             if (xSizeLow == null || ySizeLow == null) {
                 super.drawGuiContainerBackgroundLayer(mystery, mouseX, mouseY);
@@ -1448,6 +1489,12 @@ public class ClientStuff extends ClientAndServerStuff {
         public ContainerGUIWithFastBagAccess(Container container, int xSize, int ySize, ResourceLocation texture) {
             super(container, xSize, ySize);
             this.texture = texture;
+        }
+
+        @Override
+        public void drawWorldBackground(int p_146270_1_) {
+            if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory)
+                super.drawWorldBackground(p_146270_1_);
         }
 
         @Override
