@@ -88,6 +88,7 @@ public class ClientStuff extends ClientAndServerStuff {
     public static int HOTBAR_SIZE = InventoryPlayer.getHotbarSize();
     public static int INVENTORY_ROW_SIZE = 9;
     public static ResourceLocation WIDGETS = new ResourceLocation("textures/gui/widgets.png");
+    public static double BACKGROUND_FILTER_TRANSITION_SECONDS = 0.15;
 
     public static Minecraft minecraft;
     public static RenderItem itemRenderer = new RenderItem();
@@ -546,15 +547,19 @@ public class ClientStuff extends ClientAndServerStuff {
                 if (allowWalkInInventoryScreen(minecraft.currentScreen)) {
                     GameSettings settings = minecraft.gameSettings;
 
+
                     int forward = settings.keyBindForward.getKeyCode();
                     int back = settings.keyBindBack.getKeyCode();
                     int left = settings.keyBindLeft.getKeyCode();
                     int right = settings.keyBindRight.getKeyCode();
 
-                    KeyBinding.setKeyBindState(forward, Keyboard.isKeyDown(forward));
-                    KeyBinding.setKeyBindState(back, Keyboard.isKeyDown(back));
-                    KeyBinding.setKeyBindState(left, Keyboard.isKeyDown(left));
-                    KeyBinding.setKeyBindState(right, Keyboard.isKeyDown(right));
+                    int sprint = settings.keyBindSprint.getKeyCode();
+                    boolean sprintIsDown = Keyboard.isKeyDown(sprint);
+
+                    KeyBinding.setKeyBindState(forward, sprintIsDown && Keyboard.isKeyDown(forward));
+                    KeyBinding.setKeyBindState(back, sprintIsDown && Keyboard.isKeyDown(back));
+                    KeyBinding.setKeyBindState(left, sprintIsDown && Keyboard.isKeyDown(left));
+                    KeyBinding.setKeyBindState(right, sprintIsDown && Keyboard.isKeyDown(right));
 
                     KeyBinding.onTick(forward);
                     KeyBinding.onTick(back);
@@ -565,12 +570,6 @@ public class ClientStuff extends ClientAndServerStuff {
                         int jump = settings.keyBindJump.getKeyCode();
                         KeyBinding.setKeyBindState(jump, Keyboard.isKeyDown(jump));
                         KeyBinding.onTick(jump);
-                    }
-
-                    if (Config.allowSprintingInInventory) {
-                        int sprint = settings.keyBindSprint.getKeyCode();
-                        KeyBinding.setKeyBindState(sprint, Keyboard.isKeyDown(sprint));
-                        KeyBinding.onTick(sprint);
                     }
                 }
 
@@ -1426,14 +1425,39 @@ public class ClientStuff extends ClientAndServerStuff {
     }
 
     public static class InventoryGUIWithFastBagAccess extends GuiInventoryTFC {
+
+        public float backgroundFilterAlpha;
+        public long lastTimeNanosecs;
+
         public InventoryGUIWithFastBagAccess(EntityPlayer player) {
             super(player);
+            backgroundFilterAlpha = Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()) ? 0 : 1;
+            lastTimeNanosecs = System.nanoTime();
         }
 
         @Override
         public void drawWorldBackground(int p_146270_1_) {
-            if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory)
+            if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory) {
                 super.drawWorldBackground(p_146270_1_);
+            } else {
+
+                int alpha1 = Math.round(0xC0 * backgroundFilterAlpha);
+                int alpha2 = Math.round(0xD0 * backgroundFilterAlpha);
+                int color1 = 0x101010 | (alpha1 << 24);
+                int color2 = 0x101010 | (alpha2 << 24);
+
+                drawGradientRect(0, 0, width, height, color1, color2);
+
+                long nanosecs = System.nanoTime();
+                double dt = (nanosecs - lastTimeNanosecs) / 1e9;
+                lastTimeNanosecs = nanosecs;
+
+                if (Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()))
+                    backgroundFilterAlpha -= dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
+                else
+                    backgroundFilterAlpha += dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
+                backgroundFilterAlpha = Math.min(Math.max(backgroundFilterAlpha, 0), 1);
+            }
         }
 
         @Override
@@ -1485,16 +1509,39 @@ public class ClientStuff extends ClientAndServerStuff {
     public static class ContainerGUIWithFastBagAccess extends GuiContainerTFC {
 
         public ResourceLocation texture;
+        public float backgroundFilterAlpha;
+        public long lastTimeNanosecs;
 
         public ContainerGUIWithFastBagAccess(Container container, int xSize, int ySize, ResourceLocation texture) {
             super(container, xSize, ySize);
             this.texture = texture;
+            backgroundFilterAlpha = Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()) ? 0 : 1;
+            lastTimeNanosecs = System.nanoTime();
         }
 
         @Override
         public void drawWorldBackground(int p_146270_1_) {
-            if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory)
+            if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory) {
                 super.drawWorldBackground(p_146270_1_);
+            } else {
+
+                int alpha1 = Math.round(0xC0 * backgroundFilterAlpha);
+                int alpha2 = Math.round(0xD0 * backgroundFilterAlpha);
+                int color1 = 0x101010 | (alpha1 << 24);
+                int color2 = 0x101010 | (alpha2 << 24);
+
+                drawGradientRect(0, 0, width, height, color1, color2);
+
+                long nanosecs = System.nanoTime();
+                double dt = (nanosecs - lastTimeNanosecs) / 1e9;
+                lastTimeNanosecs = nanosecs;
+
+                if (Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()))
+                    backgroundFilterAlpha -= dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
+                else
+                    backgroundFilterAlpha += dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
+                backgroundFilterAlpha = Math.min(Math.max(backgroundFilterAlpha, 0), 1);
+            }
         }
 
         @Override

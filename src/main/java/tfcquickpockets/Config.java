@@ -33,8 +33,7 @@ public class Config implements IModGuiFactory {
     public static String WALK_IN_INVENTORY_CATEGORY = "walk-in-inventory";
     public static boolean allowWalkInInventory = true;
     public static boolean allowJumpingInInventory = true;
-    public static boolean allowSprintingInInventory = true;
-    public static boolean removeDarkFilterInInventory = true;
+    public static boolean removeDarkFilterInInventory = false;
 
     public static String HOTBAR_CYCLING_CATEGORY = "hotbar-cycling";
     public static boolean invertHotbarCycleDirection = false;
@@ -80,13 +79,11 @@ public class Config implements IModGuiFactory {
                 "\nWhether to automatically swap in a new stack of miscellaneous items when you use one up - if you have some extra in your inventory.\n\nExamples of misc items are flowers, clay, straw, leather, etc.\n\n");
 
         allowWalkInInventory = config.getBoolean("Enable Walk in Inventory", WALK_IN_INVENTORY_CATEGORY, true,
-                "\nWhether to allow player motion in the player inventory, and bag inventory screens.\n\nIf this is set to false, it will override the settings for jumping and sprinting.\n\n");
+                "\nWhether to allow player motion in the player inventory, and bag inventory screens when the sprint button is pressed.\n\nIf this is set to false, it will override the setting for jumping.\n\n");
         allowJumpingInInventory = config.getBoolean("Enable Jump in Inventory", WALK_IN_INVENTORY_CATEGORY, true,
                 "\nWhether to allow jumping in the player inventory, and bag inventory screens.\n\nThis setting has no effect if Walk in Inventory is disabled.\n\n");
-        allowSprintingInInventory = config.getBoolean("Enable Sprint in Inventory", WALK_IN_INVENTORY_CATEGORY, true,
-                "\nWhether to allow sprinting in the player inventory, and bag inventory screens.\n\nThis setting has no effect if Walk in Inventory is disabled.\n\n");
-        removeDarkFilterInInventory = config.getBoolean("Remove Dark Filter in Inventory", WALK_IN_INVENTORY_CATEGORY, true,
-                "\nWhether to remove the dark filter that covers the background in the player inventory, and bag inventory screens.\n\n");
+        removeDarkFilterInInventory = config.getBoolean("Remove Dark Filter When Moving", WALK_IN_INVENTORY_CATEGORY, true,
+                "\nWhether to remove the dark filter that covers the background in the player inventory, and bag inventory screens, when the sprint button is pressed.\n\n");
 
         invertHotbarCycleDirection = config.getBoolean("Invert Scrolling Direction", HOTBAR_CYCLING_CATEGORY, false,
                 "\nIf set to true, scrolling the mouse wheel up will move you *down* one inventory row, otherwise scrolling up will move you *up*.\n\n");
