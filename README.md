@@ -41,7 +41,7 @@ These hotkeys are not bound to anything by default, but you can bind them yourse
 
 ### Walk in Inventory
 
-Have you ever found it kind of strange how your character cannot move at all while your inventory screen is open. Well if this ever bothered you before, this mod allows you to move, run, and jump inside of your inventory screen. Be free.
+Have you ever found it kind of strange how your character cannot move at all while your inventory screen is open. Well if this ever bothered you before, this mod allows you to run and jump inside of your inventory screen when you hold the sprint key. Be free.
 
 Note that it wouldn't make much sense to allow the player to move around while inspecting a chest's inventory, so this feature only works for the player inventory, as well as for container inventories for containers that you can carry around with you, like the small vessel and the leather bag.
 
