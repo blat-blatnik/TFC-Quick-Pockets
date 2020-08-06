@@ -99,7 +99,7 @@ All of the above features are fully customizable. You can completely choose what
 
 ## Requirements
 
-This mod is build as an addon for TerraFirmaCraft+, a minecraft mod which you can download [here](https://www.curseforge.com/minecraft/mc-mods/terrafirmacraftplus/files) if you haven't already. It was tested and working with TFC+ versions 0.84.1, 0.85, 0.85.1, however it should also work with newer versions as long as they don't change the GUI too much.
+This mod is build as an addon for TerraFirmaCraft+, a minecraft mod which you can download [here](https://www.curseforge.com/minecraft/mc-mods/terrafirmacraftplus/files) if you haven't already. It was tested and working with TFC+ versions 0.84.1 -- 0.85.2, however it should also work with newer versions as long as they don't change the GUI too much.
 
 The mod was build using Minecraft Forge 10.13.4.1558 for minecraft 1.7.10. Forge is required for running this mod, and you can download it [here](http://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.7.10.html) if you haven't already.
 
@@ -123,6 +123,6 @@ After it has finished, the mod you built should be in the `./build/libs/` direct
 
 Download the latest version [here](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases). 
 
-Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1, 0.85, 0.85.1. 
+Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.85.2. 
 
 **Note** the mod is currently in beta. It was not tested extensively yet and so some problems could have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
