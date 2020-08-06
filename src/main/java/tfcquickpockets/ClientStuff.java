@@ -730,7 +730,7 @@ public class ClientStuff extends ClientAndServerStuff {
             int similarity = 0;
             if (item1 == item2 || item1.getUnlocalizedName().equals(item2.getUnlocalizedName()))
                 similarity += 1;
-            if (category1 == ItemCategory.OTHER && category2 == ItemCategory.OTHER && a.getItemDamage() != b.getItemDamage())
+            if ((category1 == category2 && (category1 == ItemCategory.BLOCK || category1 == ItemCategory.OTHER)) && a.getItemDamage() != b.getItemDamage())
                 similarity -= 1;
             if (category1.matches(category2))
                 similarity += 1;
@@ -1439,7 +1439,7 @@ public class ClientStuff extends ClientAndServerStuff {
         public void drawWorldBackground(int p_146270_1_) {
             if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory) {
                 super.drawWorldBackground(p_146270_1_);
-            } else {
+            } else if (Config.onlyMoveWhenSprintKeyIsPressed) {
 
                 int alpha1 = Math.round(0xC0 * backgroundFilterAlpha);
                 int alpha2 = Math.round(0xD0 * backgroundFilterAlpha);
@@ -1523,7 +1523,7 @@ public class ClientStuff extends ClientAndServerStuff {
         public void drawWorldBackground(int p_146270_1_) {
             if (minecraft.theWorld == null || !Config.removeDarkFilterInInventory) {
                 super.drawWorldBackground(p_146270_1_);
-            } else {
+            } else if (Config.onlyMoveWhenSprintKeyIsPressed) {
 
                 int alpha1 = Math.round(0xC0 * backgroundFilterAlpha);
                 int alpha2 = Math.round(0xD0 * backgroundFilterAlpha);

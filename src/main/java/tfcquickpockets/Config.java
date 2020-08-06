@@ -33,7 +33,8 @@ public class Config implements IModGuiFactory {
     public static String WALK_IN_INVENTORY_CATEGORY = "walk-in-inventory";
     public static boolean allowWalkInInventory = true;
     public static boolean allowJumpingInInventory = true;
-    public static boolean removeDarkFilterInInventory = false;
+    public static boolean removeDarkFilterInInventory = true;
+    public static boolean onlyMoveWhenSprintKeyIsPressed = true;
 
     public static String HOTBAR_CYCLING_CATEGORY = "hotbar-cycling";
     public static boolean invertHotbarCycleDirection = false;
@@ -84,6 +85,8 @@ public class Config implements IModGuiFactory {
                 "\nWhether to allow jumping in the player inventory, and bag inventory screens.\n\nThis setting has no effect if Walk in Inventory is disabled.\n\n");
         removeDarkFilterInInventory = config.getBoolean("Remove Dark Filter When Moving", WALK_IN_INVENTORY_CATEGORY, true,
                 "\nWhether to remove the dark filter that covers the background in the player inventory, and bag inventory screens, when the sprint button is pressed.\n\n");
+        onlyMoveWhenSprintKeyIsPressed = config.getBoolean("Only Move If Sprint Is Pressed", WALK_IN_INVENTORY_CATEGORY, true,
+                "\nWhether the sprint key needs to be pressed in order to move in the inventory screen.\n\nNote that if you disable this you will also move whenever you cut decay off or stack food with D/S.\n\n");
 
         invertHotbarCycleDirection = config.getBoolean("Invert Scrolling Direction", HOTBAR_CYCLING_CATEGORY, false,
                 "\nIf set to true, scrolling the mouse wheel up will move you *down* one inventory row, otherwise scrolling up will move you *up*.\n\n");

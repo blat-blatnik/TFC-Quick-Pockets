@@ -5,7 +5,7 @@
   "description": "Adds some quality of life improvements to inventory screens. So that you can focus on the game, not the inventory management.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://github.com/blat-blatnik/TFC-Quick-Pockets",
   "updateUrl": "",
   "authorList": ["Blat Blatnik"],
   "credits": "",
