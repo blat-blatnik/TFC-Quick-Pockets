@@ -41,7 +41,7 @@ public class QuickPockets {
 
     public static final String ID = "tfcquickpockets";
     public static final String NAME = "TFC+ Quick Pockets";
-    public static final String VERSION = "1.2.2b";
+    public static final String VERSION = "1.0";
     public static final String DEPENDENCIES = "required-after:terrafirmacraftplus;";
     public static final String GUI_FACTORY = ID + ".Config";
     public static final String CLIENT_SIDE = ID + ".ClientStuff";

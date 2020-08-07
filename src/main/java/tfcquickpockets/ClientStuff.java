@@ -640,7 +640,7 @@ public class ClientStuff extends ClientAndServerStuff {
                                 doRefill = true;
                             else if ((broad & ItemCategory.WEAPON_FLAG) != 0 && Config.autoRefillWeapons)
                                 doRefill = true;
-                            else if ((broad & ItemCategory.FOOD_FLAG) != 0 && Config.autoRefillFood)
+                            else if ((broad & ItemCategory.CONSUMABLE_FLAG) != 0 && Config.autoRefillFood)
                                 doRefill = true;
                             else if ((broad & ItemCategory.BLOCK_FLAG) != 0 && Config.autoRefillBlocks)
                                 doRefill = true;
@@ -1236,11 +1236,11 @@ public class ClientStuff extends ClientAndServerStuff {
         BLOCK,
         OTHER;
 
-        public static int FOOD_FLAG     = 1 << 0;
-        public static int TOOL_FLAG     = 1 << 1;
-        public static int WEAPON_FLAG   = 1 << 2;
-        public static int BLOCK_FLAG    = 1 << 3;
-        public static int MISC_FLAG     = 1 << 4;
+        public static int CONSUMABLE_FLAG = 1 << 0;
+        public static int TOOL_FLAG       = 1 << 1;
+        public static int WEAPON_FLAG     = 1 << 2;
+        public static int BLOCK_FLAG      = 1 << 3;
+        public static int MISC_FLAG       = 1 << 4;
 
         public static ItemCategory get(Item item) {
             if (item == null)
@@ -1345,7 +1345,7 @@ public class ClientStuff extends ClientAndServerStuff {
                     return TOOL_FLAG;
                 case FOOD:
                 case DRINK:
-                    return FOOD_FLAG;
+                    return CONSUMABLE_FLAG;
                 case LOG:
                 case ROCK:
                 case ROCK_FLAKE:
@@ -2244,39 +2244,39 @@ public class ClientStuff extends ClientAndServerStuff {
         @Override
         public void updateScreen() {
             super.updateScreen();
-            this.inventorySlots.putStackInSlot(0, this.vesselTE.getInputStack());
-            if (this.vesselTE.getInvCount() > 0 && this.vesselTE.getDistillationMode() == -1) {
-                if (this.guiTab == 0) {
-                    ((GuiButton)this.buttonList.get(4)).visible = false;
-                } else if (this.guiTab == 1) {
-                    ((GuiButton)this.buttonList.get(1)).visible = false;
+            inventorySlots.putStackInSlot(0, vesselTE.getInputStack());
+            if (vesselTE.getInvCount() > 0 && vesselTE.getDistillationMode() == -1) {
+                if (guiTab == 0) {
+                    ((GuiButton)buttonList.get(4)).visible = false;
+                } else if (guiTab == 1) {
+                    ((GuiButton)buttonList.get(1)).visible = false;
                 }
-            } else if (this.guiTab == 0) {
-                ((GuiButton)this.buttonList.get(4)).visible = true;
-            } else if (this.guiTab == 1) {
-                ((GuiButton)this.buttonList.get(1)).visible = true;
+            } else if (guiTab == 0) {
+                ((GuiButton)buttonList.get(4)).visible = true;
+            } else if (guiTab == 1) {
+                ((GuiButton)buttonList.get(1)).visible = true;
             }
 
-            if (this.vesselTE.getFluidLevel() > 0) {
-                if (this.guiTab == 0) {
-                    ((GuiButton)this.buttonList.get(3)).visible = false;
-                } else if (this.guiTab == 1) {
-                    ((GuiButton)this.buttonList.get(0)).visible = false;
+            if (vesselTE.getFluidLevel() > 0) {
+                if (guiTab == 0) {
+                    ((GuiButton)buttonList.get(3)).visible = false;
+                } else if (guiTab == 1) {
+                    ((GuiButton)buttonList.get(0)).visible = false;
                 }
-            } else if (this.guiTab == 0) {
-                ((GuiButton)this.buttonList.get(3)).visible = true;
-            } else if (this.guiTab == 1) {
-                ((GuiButton)this.buttonList.get(0)).visible = true;
+            } else if (guiTab == 0) {
+                ((GuiButton)buttonList.get(3)).visible = true;
+            } else if (guiTab == 1) {
+                ((GuiButton)buttonList.get(0)).visible = true;
             }
 
-            if (this.vesselTE.getSealed() && this.guiTab == 0) {
-                ((GuiButton)this.buttonList.get(0)).displayString = TFC_Core.translate("gui.Barrel.Unseal");
-                ((GuiButton)this.buttonList.get(1)).enabled = false;
-                ((GuiButton)this.buttonList.get(2)).enabled = false;
-            } else if (!this.vesselTE.getSealed() && this.guiTab == 0) {
-                ((GuiButton)this.buttonList.get(0)).displayString = TFC_Core.translate("gui.Barrel.Seal");
-                ((GuiButton)this.buttonList.get(1)).enabled = true;
-                ((GuiButton)this.buttonList.get(2)).enabled = true;
+            if (this.vesselTE.getSealed() && guiTab == 0) {
+                ((GuiButton)buttonList.get(0)).displayString = TFC_Core.translate("gui.Barrel.Unseal");
+                ((GuiButton)buttonList.get(1)).enabled = false;
+                ((GuiButton)buttonList.get(2)).enabled = false;
+            } else if (!vesselTE.getSealed() && guiTab == 0) {
+                ((GuiButton)buttonList.get(0)).displayString = TFC_Core.translate("gui.Barrel.Seal");
+                ((GuiButton)buttonList.get(1)).enabled = true;
+                ((GuiButton)buttonList.get(2)).enabled = true;
             }
 
         }
@@ -2288,30 +2288,30 @@ public class ClientStuff extends ClientAndServerStuff {
         }
 
         public void createButtons() {
-            this.buttonList.clear();
-            if (this.guiTab == 0) {
-                if (!this.vesselTE.getSealed()) {
-                    this.buttonList.add(new GuiButton(0, this.guiLeft + 38, this.guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Seal")));
+            buttonList.clear();
+            if (guiTab == 0) {
+                if (!vesselTE.getSealed()) {
+                    buttonList.add(new GuiButton(0, guiLeft + 38, guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Seal")));
                 } else {
-                    this.buttonList.add(new GuiButton(0, this.guiLeft + 38, this.guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Unseal")));
+                    buttonList.add(new GuiButton(0, guiLeft + 38, guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Unseal")));
                 }
 
-                this.buttonList.add(new GuiButton(1, this.guiLeft + 88, this.guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Empty")));
-                if (this.vesselTE.mode == 0) {
-                    this.buttonList.add(new LargeVesselGUIWithFastBagAccess.GuiBarrelTabButton(2, this.guiLeft + 39, this.guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOn"), 0, 204, 16, 16));
-                } else if (this.vesselTE.mode == 1) {
-                    this.buttonList.add(new LargeVesselGUIWithFastBagAccess.GuiBarrelTabButton(2, this.guiLeft + 39, this.guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOff"), 0, 188, 16, 16));
+                buttonList.add(new GuiButton(1, guiLeft + 88, guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Empty")));
+                if (vesselTE.mode == 0) {
+                    buttonList.add(new GuiBarrelTabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOn"), 0, 204, 16, 16));
+                } else if (vesselTE.mode == 1) {
+                    buttonList.add(new GuiBarrelTabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOff"), 0, 188, 16, 16));
                 }
 
-                this.buttonList.add(new LargeVesselGUIWithFastBagAccess.GuiBarrelTabButton(3, this.guiLeft + 36, this.guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
-                this.buttonList.add(new LargeVesselGUIWithFastBagAccess.GuiBarrelTabButton(4, this.guiLeft + 5, this.guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
-            } else if (this.guiTab == 1) {
-                this.buttonList.add(new LargeVesselGUIWithFastBagAccess.GuiBarrelTabButton(0, this.guiLeft + 36, this.guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
-                this.buttonList.add(new LargeVesselGUIWithFastBagAccess.GuiBarrelTabButton(1, this.guiLeft + 5, this.guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
-                if (!this.vesselTE.getSealed()) {
-                    this.buttonList.add(new GuiButton(2, this.guiLeft + 6, this.guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Seal")));
+                buttonList.add(new GuiBarrelTabButton(3, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
+                buttonList.add(new GuiBarrelTabButton(4, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
+            } else if (guiTab == 1) {
+                buttonList.add(new GuiBarrelTabButton(0, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
+                buttonList.add(new GuiBarrelTabButton(1, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
+                if (!vesselTE.getSealed()) {
+                    buttonList.add(new GuiButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Seal")));
                 } else {
-                    this.buttonList.add(new GuiButton(2, this.guiLeft + 6, this.guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Unseal")));
+                    buttonList.add(new GuiButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Unseal")));
                 }
             }
 
@@ -2319,39 +2319,39 @@ public class ClientStuff extends ClientAndServerStuff {
 
         @Override
         public void drawTooltip(int mx, int my, String text) {
-            this.drawHoveringText(Arrays.asList(text), mx, my + 15, this.fontRendererObj);
+            drawHoveringText(Arrays.asList(text), mx, my + 15, fontRendererObj);
             RenderHelper.disableStandardItemLighting();
             GL11.glDisable(2896);
         }
 
         @Override
         public void actionPerformed(GuiButton guibutton) {
-            if (this.guiTab == 0) {
+            if (guiTab == 0) {
                 if (guibutton.id == 0) {
-                    if (!this.vesselTE.getSealed()) {
-                        this.vesselTE.actionSeal(0, this.player);
+                    if (!vesselTE.getSealed()) {
+                        vesselTE.actionSeal(0, player);
                     } else {
-                        this.vesselTE.actionUnSeal(0, this.player);
+                        vesselTE.actionUnSeal(0, player);
                     }
                 } else if (guibutton.id == 1) {
-                    this.vesselTE.actionEmpty();
+                    vesselTE.actionEmpty();
                 } else if (guibutton.id == 2) {
-                    this.vesselTE.actionMode();
-                    this.createButtons();
-                } else if (guibutton.id == 3 && this.vesselTE.getFluidLevel() == 0 && this.vesselTE.getInvCount() == 0) {
-                    this.vesselTE.actionSwitchTab(1, this.player);
+                    vesselTE.actionMode();
+                    createButtons();
+                } else if (guibutton.id == 3 && vesselTE.getFluidLevel() == 0 && vesselTE.getInvCount() == 0) {
+                    vesselTE.actionSwitchTab(1, player);
                 }
-            } else if (this.guiTab == 1) {
-                if (guibutton.id == 1 && this.vesselTE.getInvCount() == 0) {
-                    this.vesselTE.actionSwitchTab(0, this.player);
+            } else if (guiTab == 1) {
+                if (guibutton.id == 1 && vesselTE.getInvCount() == 0) {
+                    vesselTE.actionSwitchTab(0, player);
                 } else if (guibutton.id == 2) {
-                    if (!this.vesselTE.getSealed()) {
-                        this.vesselTE.actionSeal(1, this.player);
+                    if (!vesselTE.getSealed()) {
+                        vesselTE.actionSeal(1, player);
                     } else {
-                        this.vesselTE.actionUnSeal(1, this.player);
+                        vesselTE.actionUnSeal(1, player);
                     }
 
-                    this.createButtons();
+                    createButtons();
                 }
             }
 
@@ -2360,67 +2360,77 @@ public class ClientStuff extends ClientAndServerStuff {
         @Override
         protected void drawGuiContainerBackgroundLayer(float f, int mouseX, int mouseY) {
             TFC_Core.bindTexture(TEXTURE);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
-            int w = (this.width - this.xSize) / 2;
-            int h = (this.height - this.ySize) / 2;
-            if (this.guiTab == 0) {
-                this.drawTexturedModalRect(w, h, 0, 0, this.xSize, this.getShiftedYSize());
-                if (this.vesselTE != null && this.vesselTE.fluid != null) {
-                    int scale = this.vesselTE.getLiquidScaled(50);
-                    IIcon liquidIcon = this.vesselTE.fluid.getFluid().getIcon(this.vesselTE.fluid);
+            GL11.glColor4f(1, 1, 1, 0.5f);
+            int w = (width - xSize) / 2;
+            int h = (height - ySize) / 2;
+
+            GL11.glPushMatrix();
+
+            if (guiTab == 0) {
+
+                //GL11.glTranslatef(-0.5f, -1.5f, 0.0f);
+                drawTexturedModalRect(w, h, 0, 0, xSize, getShiftedYSize());
+
+                if (vesselTE != null && vesselTE.fluid != null) {
+
+                    int scale = vesselTE.getLiquidScaled(50);
+                    int color = vesselTE.fluid.getFluid().getColor(vesselTE.fluid);
+
+                    IIcon liquidIcon = vesselTE.fluid.getFluid().getIcon(vesselTE.fluid);
                     TFC_Core.bindTexture(TextureMap.locationBlocksTexture);
-                    int color = this.vesselTE.fluid.getFluid().getColor(this.vesselTE.fluid);
                     GL11.glColor4ub((byte)(color >> 16 & 255), (byte)(color >> 8 & 255), (byte)(color & 255), (byte)-86);
-                    int div = (int)Math.floor((double)(scale / 8));
+
+                    int div = (int)Math.floor(scale / 8.0);
                     int rem = scale - div * 8;
-                    this.drawTexturedModelRectFromIcon(w + 12, h + 65 - scale, liquidIcon, 8, div > 0 ? 8 : rem);
+                    drawTexturedModelRectFromIcon(w + 12, h + 65 - scale, liquidIcon, 8, div > 0 ? 8 : rem);
 
                     for(int c = 0; div > 0 && c < div; ++c) {
-                        this.drawTexturedModelRectFromIcon(w + 12, h + 65 - (8 + c * 8), liquidIcon, 8, 8);
+                        drawTexturedModelRectFromIcon(w + 12, h + 65 - (8 + c * 8), liquidIcon, 8, 8);
                     }
 
-                    GL11.glColor3f(0.0F, 0.0F, 0.0F);
+                    GL11.glColor3f(0, 0, 0);
                 }
 
-                ItemStack inStack = this.vesselTE.getStackInSlot(0);
-                if (this.vesselTE.getFluidStack() != null) {
-                    this.drawCenteredString(this.fontRendererObj, this.vesselTE.fluid.getFluid().getLocalizedName(this.vesselTE.getFluidStack()), this.guiLeft + 88, this.guiTop + 7, 5592405);
+                ItemStack inStack = vesselTE.getStackInSlot(0);
+                if (vesselTE.getFluidStack() != null) {
+                    drawCenteredString(fontRendererObj, vesselTE.fluid.getFluid().getLocalizedName(vesselTE.getFluidStack()), guiLeft + 88, guiTop + 7, 5592405);
                 }
 
-                if (this.vesselTE.sealtime != 0) {
-                    this.drawCenteredString(this.fontRendererObj, TFC_Time.getDateStringFromHours(this.vesselTE.sealtime), this.guiLeft + 88, this.guiTop + 17, 5592405);
+                if (vesselTE.sealtime != 0) {
+                    drawCenteredString(fontRendererObj, TFC_Time.getDateStringFromHours(vesselTE.sealtime), guiLeft + 88, guiTop + 17, 5592405);
                 }
 
-                this.vesselTE.recipe = BarrelManager.getInstance().findMatchingRecipe(this.vesselTE.getInputStack(), this.vesselTE.getFluidStack(), this.vesselTE.getSealed(), this.vesselTE.getTechLevel(), this.vesselTE.isHeated(), this.vesselTE);
-                if (this.vesselTE.recipe != null) {
-                    if (!(this.vesselTE.recipe instanceof BarrelBriningRecipe)) {
-                        this.drawCenteredString(this.fontRendererObj, TFC_Core.translate("gui.Output") + ": " + this.vesselTE.recipe.getRecipeName(), this.guiLeft + 88, this.guiTop + 72, 5592405);
-                    } else if (this.vesselTE.getSealed() && this.vesselTE.getFluidStack() != null && this.vesselTE.getFluidStack().getFluid() == TFCFluids.BRINE && inStack != null && inStack.getItem() instanceof IFood && (((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Fruit || ((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Vegetable || ((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Protein || (IFood)inStack.getItem() == TFCItems.cheese) && !Food.isBrined(inStack)) {
-                        this.drawCenteredString(this.fontRendererObj, TFC_Core.translate("gui.barrel.brining"), this.guiLeft + 88, this.guiTop + 72, 5592405);
+                vesselTE.recipe = BarrelManager.getInstance().findMatchingRecipe(vesselTE.getInputStack(), vesselTE.getFluidStack(), vesselTE.getSealed(), vesselTE.getTechLevel(), vesselTE.isHeated(), vesselTE);
+                if (vesselTE.recipe != null) {
+                    if (!(vesselTE.recipe instanceof BarrelBriningRecipe)) {
+                        drawCenteredString(fontRendererObj, TFC_Core.translate("gui.Output") + ": " + vesselTE.recipe.getRecipeName(), guiLeft + 88, guiTop + 72, 5592405);
+                    } else if (vesselTE.getSealed() && vesselTE.getFluidStack() != null && vesselTE.getFluidStack().getFluid() == TFCFluids.BRINE && inStack != null && inStack.getItem() instanceof IFood && (((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Fruit || ((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Vegetable || ((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Protein || inStack.getItem() == TFCItems.cheese) && !Food.isBrined(inStack)) {
+                        drawCenteredString(fontRendererObj, TFC_Core.translate("gui.barrel.brining"), guiLeft + 88, guiTop + 72, 5592405);
                     }
-                } else if (this.vesselTE.recipe == null && this.vesselTE.getSealed() && this.vesselTE.getFluidStack() != null && inStack != null && inStack.getItem() instanceof IFood && this.vesselTE.getFluidStack().getFluid() == TFCFluids.VINEGAR && !Food.isPickled(inStack) && Food.getWeight(inStack) / (float)this.vesselTE.getFluidStack().amount <= 160.0F / (float)this.vesselTE.getMaxLiquid()) {
+                } else if (vesselTE.recipe == null && vesselTE.getSealed() && vesselTE.getFluidStack() != null && inStack != null && inStack.getItem() instanceof IFood && vesselTE.getFluidStack().getFluid() == TFCFluids.VINEGAR && !Food.isPickled(inStack) && Food.getWeight(inStack) / (float)vesselTE.getFluidStack().amount <= 160.0F / (float)vesselTE.getMaxLiquid()) {
                     if ((((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Fruit || ((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Vegetable || ((IFood)inStack.getItem()).getFoodGroup() == EnumFoodGroup.Protein || (IFood)inStack.getItem() == TFCItems.cheese) && Food.isBrined(inStack)) {
-                        this.drawCenteredString(this.fontRendererObj, TFC_Core.translate("gui.barrel.pickling"), this.guiLeft + 88, this.guiTop + 72, 5592405);
+                        drawCenteredString(fontRendererObj, TFC_Core.translate("gui.barrel.pickling"), guiLeft + 88, guiTop + 72, 5592405);
                     }
                 } else {
-                    BarrelPreservativeRecipe preservative = BarrelManager.getInstance().findMatchingPreservativeRepice(this.vesselTE, inStack, this.vesselTE.getFluidStack(), this.vesselTE.getSealed());
+                    BarrelPreservativeRecipe preservative = BarrelManager.getInstance().findMatchingPreservativeRepice(vesselTE, inStack, vesselTE.getFluidStack(), vesselTE.getSealed());
                     if (preservative != null) {
-                        this.drawCenteredString(this.fontRendererObj, TFC_Core.translate(preservative.getPreservingString()), this.guiLeft + 88, this.guiTop + 72, 5592405);
+                        drawCenteredString(fontRendererObj, TFC_Core.translate(preservative.getPreservingString()), guiLeft + 88, guiTop + 72, 5592405);
                     }
                 }
-            } else if (this.guiTab == 1) {
-                this.drawTexturedModalRect(w, h, 0, 86, this.xSize, this.getShiftedYSize());
+            } else if (guiTab == 1) {
+                drawTexturedModalRect(w, h, 0, 86, xSize, getShiftedYSize());
             }
 
-            PlayerInventory.drawInventory(this, this.width, this.height, this.getShiftedYSize());
+            GL11.glPopMatrix();
+            PlayerInventory.drawInventory(this, width, height, getShiftedYSize());
         }
 
         @Override
         public void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-            if (this.guiTab == 0 && this.mouseInRegion(12, 15, 9, 50, mouseX, mouseY)) {
+            if (guiTab == 0 && mouseInRegion(12, 15, 9, 50, mouseX, mouseY)) {
                 ArrayList<String> list = new ArrayList();
-                list.add(this.vesselTE.getFluidLevel() + "mB");
-                this.drawHoveringText(list, mouseX - this.guiLeft, mouseY - this.guiTop + 8, this.fontRendererObj);
+                list.add(vesselTE.getFluidLevel() + "mB");
+                drawHoveringText(list, mouseX - guiLeft, mouseY - guiTop + 8, fontRendererObj);
             }
 
         }
@@ -2433,15 +2443,15 @@ public class ClientStuff extends ClientAndServerStuff {
         @Override
         public void drawScreen(int x, int y, float par3) {
             super.drawScreen(x, y, par3);
-            if (this.vesselTE.getSealed()) {
+            if (vesselTE.getSealed()) {
                 GL11.glPushMatrix();
-                if (this.guiTab == 0) {
-                    Slot inputSlot = this.inventorySlots.getSlot(0);
-                    this.drawSlotOverlay(inputSlot);
-                } else if (this.guiTab == 1) {
-                    for(int i = 0; i < this.vesselTE.storage.length; ++i) {
-                        Slot slot = this.inventorySlots.getSlot(i);
-                        this.drawSlotOverlay(slot);
+                if (guiTab == 0) {
+                    Slot inputSlot = inventorySlots.getSlot(0);
+                    drawSlotOverlay(inputSlot);
+                } else if (guiTab == 1) {
+                    for (int i = 0; i < vesselTE.storage.length; ++i) {
+                        Slot slot = inventorySlots.getSlot(i);
+                        drawSlotOverlay(slot);
                     }
                 }
 
@@ -2453,10 +2463,10 @@ public class ClientStuff extends ClientAndServerStuff {
         public void drawSlotOverlay(Slot slot) {
             GL11.glDisable(2896);
             GL11.glDisable(2929);
-            int xPos = slot.xDisplayPosition + this.guiLeft - 1;
-            int yPos = slot.yDisplayPosition + this.guiTop - 1;
+            int xPos = slot.xDisplayPosition + guiLeft - 1;
+            int yPos = slot.yDisplayPosition + guiTop - 1;
             GL11.glColorMask(true, true, true, false);
-            this.drawGradientRect(xPos, yPos, xPos + 18, yPos + 18, 1979711487, 1979711487);
+            drawGradientRect(xPos, yPos, xPos + 18, yPos + 18, 1979711487, 1979711487);
             GL11.glColorMask(true, true, true, true);
             GL11.glEnable(2896);
             GL11.glEnable(2929);
@@ -2472,40 +2482,39 @@ public class ClientStuff extends ClientAndServerStuff {
 
             public GuiBarrelTabButton(int index, int xPos, int yPos, int width, int height, LargeVesselGUIWithFastBagAccess gui, IIcon icon, String s) {
                 super(index, xPos, yPos, width, height, s);
-                this.screen = gui;
-                this.buttonicon = icon;
+                screen = gui;
+                buttonicon = icon;
             }
 
             public GuiBarrelTabButton(int index, int xPos, int yPos, int width, int height, LargeVesselGUIWithFastBagAccess gui, String s, int xp, int yp, int xs, int ys) {
                 super(index, xPos, yPos, width, height, s);
-                this.screen = gui;
                 this.xPos = xp;
                 this.yPos = yp;
-                this.xSize = xs;
-                this.ySize = ys;
+                screen = gui;
+                xSize = xs;
+                ySize = ys;
             }
 
             public void drawButton(Minecraft mc, int x, int y) {
                 if (this.visible) {
                     TFC_Core.bindTexture(GuiLargeVessel.TEXTURE);
-                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    this.zLevel = 301.0F;
-                    this.drawTexturedModalRect(this.xPosition, this.yPosition, this.xPos, this.yPos, this.xSize, this.ySize);
-                    this.field_146123_n = x >= this.xPosition && y >= this.yPosition && x < this.xPosition + this.width && y < this.yPosition + this.height;
-                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    GL11.glColor4f(1, 1, 1, 1);
+                    zLevel = 301;
+                    drawTexturedModalRect(xPosition, yPosition, xPos, yPos, xSize, ySize);
+                    field_146123_n = x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height;
+                    GL11.glColor4f(1, 1, 1, 1);
                     TFC_Core.bindTexture(TextureMap.locationBlocksTexture);
-                    if (this.buttonicon != null) {
-                        this.drawTexturedModelRectFromIcon(this.xPosition + 12, this.yPosition + 4, this.buttonicon, 8, 8);
+                    if (buttonicon != null) {
+                        drawTexturedModelRectFromIcon(xPosition + 12, yPosition + 4, buttonicon, 8, 8);
                     }
 
-                    this.zLevel = 0.0F;
-                    this.mouseDragged(mc, x, y);
-                    if (this.field_146123_n) {
-                        this.screen.drawTooltip(x, y, this.displayString);
-                        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    zLevel = 0;
+                    mouseDragged(mc, x, y);
+                    if (field_146123_n) {
+                        screen.drawTooltip(x, y, displayString);
+                        GL11.glColor4f(1, 1, 1, 1);
                     }
                 }
-
             }
         }
     }
