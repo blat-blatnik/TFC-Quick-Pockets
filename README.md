@@ -125,4 +125,4 @@ Download the latest version [here](https://github.com/blat-blatnik/TFC-Quick-Poc
 
 Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.85.2. 
 
-**Note** the mod is currently in beta. It was not tested extensively yet and so some problems could have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
+**Note** This mod manipulates your inventory. Even though it was tested somewhat thoroughly by this point some problems may still have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
