@@ -1,13 +1,21 @@
 // This code is in the public domain. You can do anything you want with it, and you don't even
 // have to give credits if you don't feel like it, although that would obviously be appreciated.
 
+// CHANGES
+// - added Sounds
+// - improved auto-refill. it will no longer try to replace vessels with leather bags for example.
+// - "remove dark filter in inventory" is now turned off by default.
+// - picking up food will now automatically stack it in your inventory
+
 package tfcquickpockets;
 
 import com.dunk.tfc.Core.Player.BodyTempStats;
 import com.dunk.tfc.Core.Player.PlayerInventory;
+import com.dunk.tfc.Core.Player.PlayerManagerTFC;
 import com.dunk.tfc.Core.TFC_Core;
 import com.dunk.tfc.Core.TFC_Textures;
 import com.dunk.tfc.Core.TFC_Time;
+import com.dunk.tfc.Entities.Mobs.EntityCowTFC;
 import com.dunk.tfc.Entities.Mobs.EntityHorseTFC;
 import com.dunk.tfc.Food.ItemFoodTFC;
 import com.dunk.tfc.GUI.*;
@@ -23,6 +31,7 @@ import com.dunk.tfc.Items.Tools.*;
 import com.dunk.tfc.TerraFirmaCraft;
 import com.dunk.tfc.TileEntities.*;
 import com.dunk.tfc.api.Crafting.*;
+import com.dunk.tfc.api.Entities.IAnimal;
 import com.dunk.tfc.api.Enums.EnumDamageType;
 import com.dunk.tfc.api.Enums.EnumFoodGroup;
 import com.dunk.tfc.api.Enums.RuleEnum;
@@ -42,6 +51,9 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
@@ -55,6 +67,10 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLeashKnot;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -62,6 +78,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.*;
 import net.minecraft.item.ItemShears;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
@@ -70,7 +87,11 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -79,16 +100,46 @@ import org.lwjgl.opengl.GL12;
 import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.*;
+import java.util.List;
 
 public class ClientStuff extends ClientAndServerStuff {
 
     public static int HOTBAR_SIZE = InventoryPlayer.getHotbarSize();
     public static int INVENTORY_ROW_SIZE = 9;
-    public static ResourceLocation WIDGETS = new ResourceLocation("textures/gui/widgets.png");
     public static double BACKGROUND_FILTER_TRANSITION_SECONDS = 0.15;
+    public static int SOUND_WAIT_TICKS = 2;
+
+    public static ResourceLocation WIDGETS = new ResourceLocation("textures/gui/widgets.png");
+    public static ResourceLocation BAG_OPEN = new ResourceLocation("tfcquickpockets", "bag.open");
+    public static ResourceLocation LEASH_PLACE = new ResourceLocation("tfcquickpockets", "leash.place");
+    public static ResourceLocation LEASH_BREAK = new ResourceLocation("tfcquickpockets", "leash.break");
+    public static ResourceLocation FIRE_CRACKLE = new ResourceLocation("tfcquickpockets", "fire.crackle");
+    public static ResourceLocation ATTACK_SWORD = new ResourceLocation("tfcquickpockets", "attack.sword");
+    public static ResourceLocation ATTACK_MACE = new ResourceLocation("tfcquickpockets", "attack.mace");
+    public static ResourceLocation ATTACK_AXE = new ResourceLocation("tfcquickpockets", "attack.axe");
+    public static ResourceLocation ATTACK_STRONG = new ResourceLocation("tfcquickpockets", "attack.strong");
+    public static ResourceLocation ATTACK_WEAK = new ResourceLocation("tfcquickpockets", "attack.weak");
+    public static ResourceLocation BOW_NOCK = new ResourceLocation("tfcquickpockets", "bow.nock");
+    public static ResourceLocation BUCKET_FILL = new ResourceLocation("tfcquickpockets", "bucket.fill");
+    public static ResourceLocation BUCKET_FILL_VISCOUS = new ResourceLocation("tfcquickpockets", "bucket.fill.viscous");
+    public static ResourceLocation BUCKET_EMPTY = new ResourceLocation("tfcquickpockets", "bucket.fill");
+    public static ResourceLocation BUCKET_EMPTY_VISCOUS = new ResourceLocation("tfcquickpockets", "bucket.fill.viscous");
+    public static ResourceLocation COW_MILK = new ResourceLocation("tfcquickpockets", "cow.milk");
+    public static ResourceLocation FLUID_SOAK = new ResourceLocation("tfcquickpockets", "fluid.soak");
+    public static ResourceLocation FLUID_SOAK_VISCOUS = new ResourceLocation("tfcquickpockets", "fluid.soak.viscous");
+    public static ResourceLocation FLUID_UNSOAK = new ResourceLocation("tfcquickpockets", "fluid.unsoak");
+    public static ResourceLocation FLUID_UNSOAK_VISCOUS = new ResourceLocation("tfcquickpockets", "fluid.unsoak.viscous");
+    public static ResourceLocation FLUID_EMPTY = new ResourceLocation("tfcquickpockets", "fluid.empty");
+    public static ResourceLocation FLUID_EMPTY_VISCOUS = new ResourceLocation("tfcquickpockets", "fluid.empty.viscous");
+    public static ResourceLocation BARREL_UNSEAL = new ResourceLocation("tfcquickpockets", "barrel.unseal");
+    public static ResourceLocation BARREL_SEAL = new ResourceLocation("tfcquickpockets", "barrel.seal");
+    public static ResourceLocation LARGE_VESSEL_UNSEAL = new ResourceLocation("tfcquickpockets", "large.vessel.unseal");
+    public static ResourceLocation LARGE_VESSEL_SEAL = new ResourceLocation("tfcquickpockets", "large.vessel.seal");
+    public static ResourceLocation BEEHIVE_OPEN = new ResourceLocation("tfcquickpockets", "beehive.open");
+    public static ResourceLocation BEEHIVE_CLOSE = new ResourceLocation("tfcquickpockets", "beehive.close");
+    public static ResourceLocation BEEHIVE_DRIP = new ResourceLocation("tfcquickpockets", "beehive.drip");
+    public static ResourceLocation CHEST_CLOSE = new ResourceLocation("tfcquickpockets", "chest.close");
 
     public static Minecraft minecraft;
     public static RenderItem itemRenderer = new RenderItem();
@@ -106,6 +157,14 @@ public class ClientStuff extends ClientAndServerStuff {
     public static ItemStack[] inventoryDuringDrink = new ItemStack[HOTBAR_SIZE + 3 * INVENTORY_ROW_SIZE];
     public static ItemStack lastHeldStack = null;
     public static int lastSelectedItem = -1;
+    public static int switchHotbarSlotSoundWaitTicks = 0;
+    public static int bucketSoundWaitTicks = 0;
+    public static int bowNockSoundWaitTicks = 0;
+    public static boolean skipNextBucketSound = false;
+    public static ISound bowNockSound = null;
+    public static HashSet<EntityLiving> leashedEntities = new HashSet<EntityLiving>();
+    public static HashSet<EntityLiving> leashedEntitiesSwap = new HashSet<EntityLiving>();
+    public static Random rng = new Random();
     public static Method syncCurrentPlayItem;
     public static Field remainingHighlightTicks;
 
@@ -217,10 +276,12 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent @SuppressWarnings("unused")
     public void doQuickToolSwap(InputEvent.KeyInputEvent event) {
-        for (ToolSwapBinding swapKeyBind : quickToolSwaps) {
-            if (swapKeyBind.isPressed()) {
-                swapToolIntoHotbarSlot(swapKeyBind);
-                break;
+        if (!Config.clientOnlyMode) {
+            for (ToolSwapBinding swapKeyBind : quickToolSwaps) {
+                if (swapKeyBind.isPressed()) {
+                    swapToolIntoHotbarSlot(swapKeyBind);
+                    break;
+                }
             }
         }
     }
@@ -232,20 +293,23 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent(priority=EventPriority.LOWEST) @SuppressWarnings("unused")
     public void cycleThroughInventoryRowsOnMouseScroll(InputEvent.MouseInputEvent event) {
-        int delta = Mouse.getEventDWheel();
-        if (delta != 0) {
-            if (cycleHotbar.getIsKeyPressed()) {
-                if (Config.invertHotbarCycleDirection)
-                    delta = -delta;
+        if (!Config.clientOnlyMode) {
+            int delta = Mouse.getEventDWheel();
+            if (delta != 0) {
+                if (cycleHotbar.getIsKeyPressed()) {
+                    if (Config.invertHotbarCycleDirection)
+                        delta = -delta;
 
-                sendCycleInventoryRowsToServer(delta < 0);
-                setCurrentPlayerItem(selectedSlotAtStartOfMouseInput);
+                    sendCycleInventoryRowsToServer(delta < 0);
+                    setCurrentPlayerItem(selectedSlotAtStartOfMouseInput);
+                }
             }
         }
     }
 
     @SubscribeEvent @SuppressWarnings("unused")
     public void makeGUIsHaveQuickContainerAccess(GuiOpenEvent event) {
+
         if (event.gui instanceof GuiContainer) {
             stopSwappingToolsInHotbarSlot();
 
@@ -543,10 +607,18 @@ public class ClientStuff extends ClientAndServerStuff {
         if (minecraft.thePlayer != null) {
 
             if (event.phase == TickEvent.Phase.START) {
+                --bucketSoundWaitTicks;
+                if (bucketSoundWaitTicks < 0)
+                    bucketSoundWaitTicks = 0;
+                --bowNockSoundWaitTicks;
+                if (bowNockSoundWaitTicks < 0)
+                    bowNockSoundWaitTicks = 0;
+                --switchHotbarSlotSoundWaitTicks;
+                if (switchHotbarSlotSoundWaitTicks < 0)
+                    switchHotbarSlotSoundWaitTicks = 0;
 
                 if (allowWalkInInventoryScreen(minecraft.currentScreen)) {
                     GameSettings settings = minecraft.gameSettings;
-
 
                     int forward = settings.keyBindForward.getKeyCode();
                     int back = settings.keyBindBack.getKeyCode();
@@ -577,7 +649,7 @@ public class ClientStuff extends ClientAndServerStuff {
 
             } else if (event.phase == TickEvent.Phase.END) {
 
-                if (Config.waterskinFixDelayTicks > 0) {
+                if (!Config.clientOnlyMode && Config.waterskinFixDelayTicks > 0) {
                     ItemStack[] inventory = minecraft.thePlayer.inventory.mainInventory;
 
                     if (drinkToFix != null && drinkSlotIndexPreUse >= 0 && drinkSlotIndexPostUse >= 0) {
@@ -602,6 +674,184 @@ public class ClientStuff extends ClientAndServerStuff {
                 }
 
                 checkIfNeedToDoAutoFill();
+
+                if (Config.enableRopeSounds) {
+                    leashedEntitiesSwap.clear();
+                    for (EntityLiving entity : leashedEntities)
+                        if (entity.getLeashed())
+                            leashedEntitiesSwap.add(entity);
+
+                    HashSet<EntityLiving> temp = leashedEntitiesSwap;
+                    leashedEntitiesSwap = leashedEntities;
+                    leashedEntities = leashedEntitiesSwap;
+                }
+
+                if (Config.enableFirepitSounds && minecraft != null && minecraft.theWorld != null && minecraft.thePlayer != null && !minecraft.isGamePaused()) {
+                    @SuppressWarnings("unchecked")
+                    List<TileEntity> loadedTileEntities = minecraft.theWorld.loadedTileEntityList;
+                    for (TileEntity entity : loadedTileEntities) {
+
+                        int x = entity.xCoord;
+                        int y = entity.yCoord;
+                        int z = entity.zCoord;
+                        double distanceToPlayer = minecraft.thePlayer.getDistanceSq(x + 0.5f, y + 0.5f, z + 0.5f);
+
+                        if (distanceToPlayer < 16*16 && entity instanceof TEFirepit) {
+                            TEFirepit fire = (TEFirepit)minecraft.theWorld.getTileEntity(x, y, z);
+                            if (fire != null) {
+
+                                float whatever = fire.getTemperatureScaled(49);
+
+                                int meta = minecraft.theWorld.getBlockMetadata(x, y, z);
+                                if (meta > 0) { //MAINTENANCE: meta > 0 means the firepit is lit right now.
+                                    if (rng.nextFloat() > 0.95) {
+
+                                        float tempFactor = fire.fireTemp / 700.0f;
+                                        float loudness = 0.05f + tempFactor;
+                                        float pitch = 1.2f - 0.4f * tempFactor;
+
+                                        System.out.printf("Crackle meta: %d, fireTemp: %.1f, loudness: %.2f, pitch: %.2f\n", meta, fire.fireTemp, loudness, pitch);
+                                        playSound(FIRE_CRACKLE, fire, loudness, pitch);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent @SuppressWarnings("unused")
+    public void playMeleeWeaponSound(AttackEntityEvent event) {
+        EntityPlayer player = event.entityPlayer;
+        if (Config.enableMeleeWeaponSounds && player != null) {
+            if (PlayerManagerTFC.getInstance().getPlayerInfoFromPlayer(player).canAttack()) {
+
+                ItemStack weapon = player.inventory.getCurrentItem();
+                ItemCategory category = ItemCategory.OTHER;
+                if (weapon != null)
+                    category = ItemCategory.get(weapon.getItem());
+
+                switch (category) {
+                    case SWORD:
+                    case STAFF:
+                        playSound(ATTACK_SWORD, minecraft.thePlayer, 1, 1);
+                        break;
+                    case AXE:
+                    case JAVELIN:
+                        playSound(ATTACK_AXE, minecraft.thePlayer, 1, 1);
+                        break;
+                    case MACE:
+                        playSound(ATTACK_MACE, minecraft.thePlayer, 1, 1);
+                        break;
+                    default:
+                        int broad = category.getBroadCategoryFlags();
+                        if ((broad & ItemCategory.WEAPON_FLAG) != 0 || (broad & ItemCategory.TOOL_FLAG) != 0)
+                            playSound(ATTACK_STRONG, minecraft.thePlayer, 1, 1);
+                        else
+                            playSound(ATTACK_WEAK, minecraft.thePlayer, 1, 1);
+                        break;
+                }
+
+            }
+        }
+    }
+
+    @SubscribeEvent @SuppressWarnings("unused")
+    public void playBowNockSound(ArrowNockEvent event) {
+        if (Config.enableBowWeaponSounds && bowNockSoundWaitTicks <= 0) {
+            bowNockSoundWaitTicks = SOUND_WAIT_TICKS;
+            System.out.println("\nArrow nock");
+            bowNockSound = playSound(BOW_NOCK, minecraft.thePlayer, 1, 1);
+        }
+    }
+
+    @SubscribeEvent @SuppressWarnings("unused")
+    public void stopBowNockSound(ArrowLooseEvent event) {
+        System.out.println("\nArrow fire");
+        stopSound(bowNockSound);
+    }
+
+    @SubscribeEvent @SuppressWarnings("unused")
+    public void playCowMilkingSound(EntityInteractEvent event) {
+        EntityPlayer player = event.entityPlayer;
+        Entity target = event.target;
+        if (player != null && target != null) {
+
+            ItemStack currentStack = player.inventory.getCurrentItem();
+            if (currentStack != null) {
+                Item currentItem = currentStack.getItem();
+                if (currentItem == ItemSetup.woodenBucketEmpty || currentItem == ItemSetup.clayBucketEmpty) {
+
+                    boolean canMilkEntity = false;
+
+                    if (target instanceof EntityCowTFC) {
+                        EntityCowTFC cow = (EntityCowTFC)target;
+
+                        canMilkEntity =
+                                !(player.isSneaking() && !cow.getFamiliarizedToday() && cow.canFamiliarize()) &&
+                                cow.getGender() == IAnimal.GenderEnum.FEMALE &&
+                                cow.isAdult() &&
+                                cow.getHasMilkTime() < TFC_Time.getTotalTicks() &&
+                                cow.checkFamiliarity(IAnimal.InteractionEnum.MILK, player);
+
+                    }
+
+                    if (canMilkEntity) {
+                        skipNextBucketSound = true;
+                        playSound(COW_MILK, target, 1, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent @SuppressWarnings("unused")
+    public void playLeashPlacedSound(EntityJoinWorldEvent event) {
+        if (Config.enableRopeSounds) {
+            Entity entity = event.entity;
+            if (entity instanceof EntityLeashKnot) {
+                playSound(LEASH_PLACE, entity, 0.9f, 1);
+            }
+        }
+    }
+
+    @SubscribeEvent @SuppressWarnings("unused")
+    public void playLeashBreakSound(LivingEvent.LivingUpdateEvent event) {
+        EntityLivingBase entityBase = event.entityLiving;
+        if (entityBase instanceof EntityLiving) {
+            EntityLiving entity = (EntityLiving)entityBase;
+
+            boolean isKnownToBeLeashed = leashedEntities.contains(entity);
+
+            if (!entity.getLeashed() && isKnownToBeLeashed) {
+                System.out.println("\nnum leashed entities: " + leashedEntities.size());
+                playSound(LEASH_BREAK, entity, 0.9f, 1);
+                leashedEntities.remove(entity);
+            } else if (entity.getLeashed() && !isKnownToBeLeashed) {
+                leashedEntities.add(entity);
+            }
+        }
+    }
+
+    @SubscribeEvent @SuppressWarnings("unused")
+    public void stackFoodOnPickup(EntityItemPickupEvent event) {
+        if (Config.autoStackFoodOnPickup && event.item != null && event.entityPlayer != null) {
+            ItemStack stack = event.item.getEntityItem();
+            if (stack != null) {
+                Item item = stack.getItem();
+                if (item != null) {
+                    if (item instanceof ItemFoodTFC) {
+
+                        EntityPlayer player = event.entityPlayer;
+                        int nextFreeSlot = player.inventory.getFirstEmptyStack();
+                        if (nextFreeSlot >= 0) {
+                            int foodSlotIndex = 9 + convertInventoryIndexToSlotIndex(player.inventory.getFirstEmptyStack());
+                            sendStackFoodToServer(foodSlotIndex);
+                        }
+                    }
+                }
             }
         }
     }
@@ -617,7 +867,14 @@ public class ClientStuff extends ClientAndServerStuff {
                 ItemStack[] inventory = playerInventory.mainInventory;
                 ItemStack currentHeldStack = inventory[playerInventory.currentItem];
 
-                if (lastSelectedItem == currentSelectedItem) {
+                boolean hotbarSlotSwitched = lastSelectedItem != currentSelectedItem && lastSelectedItem > 0;
+
+                if (hotbarSlotSwitched && switchHotbarSlotSoundWaitTicks <= 0 && Config.enableSwitchHotbarSlotSound) {
+
+                    switchHotbarSlotSoundWaitTicks = SOUND_WAIT_TICKS;
+                    playSound(BAG_OPEN, minecraft.thePlayer, 0.5f, 1.2f);
+
+                } else if (lastSelectedItem == currentSelectedItem) {
 
                     boolean heldItemSuddenlyChanged =
                             (lastHeldStack != null && currentHeldStack == null) ||
@@ -632,24 +889,144 @@ public class ClientStuff extends ClientAndServerStuff {
 
                         if (itWasBecauseHeldItemGotUsedOrDestroyed) {
 
-                            ItemCategory category = ItemCategory.get(lastHeldStack.getItem());
-                            int broad = category.getBroadCategoryFlags();
+                            boolean canCheckForBucketSounds =
+                                    Config.enableBucketSounds &&
+                                    bucketSoundWaitTicks <= 0 &&
+                                    lastHeldStack != null &&
+                                    lastHeldStack.getItem() != null &&
+                                    currentHeldStack != null &&
+                                    currentHeldStack.getItem() != null;
 
-                            boolean doRefill = false;
-                            if ((broad & ItemCategory.TOOL_FLAG) != 0 && Config.autoRefillTools)
-                                doRefill = true;
-                            else if ((broad & ItemCategory.WEAPON_FLAG) != 0 && Config.autoRefillWeapons)
-                                doRefill = true;
-                            else if ((broad & ItemCategory.CONSUMABLE_FLAG) != 0 && Config.autoRefillFood)
-                                doRefill = true;
-                            else if ((broad & ItemCategory.BLOCK_FLAG) != 0 && Config.autoRefillBlocks)
-                                doRefill = true;
-                            else if ((broad & ItemCategory.MISC_FLAG) != 0 && Config.autoRefillMisc)
-                                doRefill = true;
+                            if (canCheckForBucketSounds) {
+                                Item lastItem = lastHeldStack.getItem();
+                                Item currItem = currentHeldStack.getItem();
 
-                            if (doRefill) {
-                                //System.err.printf("\nAuto refilling %s in slot with %s\n", lastHeldStack, currentHeldStack);
-                                doAutoRefill(lastHeldStack);
+                                boolean lastItemIsBucket =
+                                        lastItem == ItemSetup.woodenBucketEmpty || lastItem == ItemSetup.clayBucketEmpty ||
+                                        lastItem == ItemSetup.woodenBucketWater || lastItem == ItemSetup.clayBucketWater ||
+                                        lastItem == ItemSetup.woodenBucketSaltWater || lastItem == ItemSetup.clayBucketSaltWater ||
+                                        lastItem == ItemSetup.woodenBucketMilk || lastItem == ItemSetup.clayBucketMilk ||
+                                        lastItem == ItemSetup.woodenBucketVinegar || lastItem == ItemSetup.clayBucketVinegar ||
+                                        lastItem == ItemSetup.woodenBucketHoney || lastItem == ItemSetup.clayBucketHoney ||
+                                        lastItem == ItemSetup.woodenBucketPitch || lastItem == ItemSetup.clayBucketPitch;
+
+                                boolean currItemIsBucket =
+                                        currItem == ItemSetup.woodenBucketEmpty || currItem == ItemSetup.clayBucketEmpty ||
+                                        currItem == ItemSetup.woodenBucketWater || currItem == ItemSetup.clayBucketWater ||
+                                        currItem == ItemSetup.woodenBucketSaltWater || currItem == ItemSetup.clayBucketSaltWater ||
+                                        currItem == ItemSetup.woodenBucketMilk || currItem == ItemSetup.clayBucketMilk ||
+                                        currItem == ItemSetup.woodenBucketVinegar || currItem == ItemSetup.clayBucketVinegar ||
+                                        currItem == ItemSetup.woodenBucketHoney || currItem == ItemSetup.clayBucketHoney ||
+                                        currItem == ItemSetup.woodenBucketPitch || currItem == ItemSetup.clayBucketPitch;
+
+                                if (lastItemIsBucket && currItemIsBucket) {
+
+                                    boolean lastItemIsClayBucket =
+                                            lastItem == ItemSetup.clayBucketEmpty ||
+                                            lastItem == ItemSetup.clayBucketWater ||
+                                            lastItem == ItemSetup.clayBucketSaltWater ||
+                                            lastItem == ItemSetup.clayBucketMilk ||
+                                            lastItem == ItemSetup.clayBucketVinegar ||
+                                            lastItem == ItemSetup.clayBucketHoney ||
+                                            lastItem == ItemSetup.clayBucketPitch;
+                                    boolean lastItemIsRedSteelBucket =
+                                            lastItem == ItemSetup.redSteelBucketEmpty ||
+                                            lastItem == ItemSetup.redSteelBucketWater ||
+                                            lastItem == ItemSetup.redSteelBucketSaltWater;
+                                    boolean lastItemIsBlueSteelBucket =
+                                            lastItem == ItemSetup.blueSteelBucketEmpty ||
+                                            lastItem == ItemSetup.blueSteelBucketLava;
+
+                                    boolean currItemIsClayBucket =
+                                            currItem == ItemSetup.clayBucketEmpty ||
+                                            currItem == ItemSetup.clayBucketWater ||
+                                            currItem == ItemSetup.clayBucketSaltWater ||
+                                            currItem == ItemSetup.clayBucketMilk ||
+                                            currItem == ItemSetup.clayBucketVinegar ||
+                                            currItem == ItemSetup.clayBucketHoney ||
+                                            currItem == ItemSetup.clayBucketPitch;
+                                    boolean currItemIsRedSteelBucket =
+                                            currItem == ItemSetup.redSteelBucketEmpty ||
+                                            currItem == ItemSetup.redSteelBucketWater ||
+                                            currItem == ItemSetup.redSteelBucketSaltWater;
+                                    boolean currItemIsBlueSteelBucket =
+                                            currItem == ItemSetup.blueSteelBucketEmpty ||
+                                            currItem == ItemSetup.blueSteelBucketLava;
+
+                                    int lastBucketMaterial =
+                                            lastItemIsClayBucket ? 1 :
+                                            lastItemIsBlueSteelBucket ? 2 :
+                                            lastItemIsRedSteelBucket ? 3 : 4;
+                                    int currBucketMaterial =
+                                            currItemIsClayBucket ? 1 :
+                                            currItemIsBlueSteelBucket ? 2 :
+                                            currItemIsRedSteelBucket ? 3 : 4;
+
+                                    if (lastBucketMaterial == currBucketMaterial) {
+
+                                        boolean lastItemIsEmptyBucket =
+                                                lastItem == ItemSetup.woodenBucketEmpty ||
+                                                lastItem == ItemSetup.clayBucketEmpty ||
+                                                lastItem == ItemSetup.blueSteelBucketEmpty ||
+                                                lastItem == ItemSetup.redSteelBucketEmpty;
+
+                                        boolean currItemIsEmptyBucket =
+                                                currItem == ItemSetup.woodenBucketEmpty ||
+                                                currItem == ItemSetup.clayBucketEmpty ||
+                                                currItem == ItemSetup.blueSteelBucketEmpty ||
+                                                currItem == ItemSetup.redSteelBucketEmpty;;
+
+                                        boolean fluidIsViscous =
+                                                lastItem == ItemSetup.woodenBucketPitch || lastItem == ItemSetup.clayBucketPitch ||
+                                                lastItem == ItemSetup.woodenBucketHoney || lastItem == ItemSetup.clayBucketHoney ||
+                                                currItem == ItemSetup.woodenBucketPitch || currItem == ItemSetup.clayBucketPitch ||
+                                                currItem == ItemSetup.woodenBucketHoney || currItem == ItemSetup.clayBucketHoney ||
+                                                currItem == ItemSetup.blueSteelBucketLava;
+
+                                        ResourceLocation bucketSound = null;
+
+
+                                        if (lastItemIsEmptyBucket && !currItemIsEmptyBucket) {
+                                            if (fluidIsViscous)
+                                                bucketSound = BUCKET_FILL_VISCOUS;
+                                            else
+                                                bucketSound = BUCKET_FILL;
+                                        } else if (!lastItemIsEmptyBucket && currItemIsEmptyBucket) {
+                                            if (fluidIsViscous)
+                                                bucketSound = BUCKET_EMPTY_VISCOUS;
+                                            else
+                                                bucketSound = BUCKET_EMPTY;
+                                        }
+
+                                        if (bucketSound != null) {
+                                            bucketSoundWaitTicks = SOUND_WAIT_TICKS;
+                                            if (skipNextBucketSound)
+                                                skipNextBucketSound = false;
+                                            else
+                                                playSound(bucketSound, minecraft.thePlayer, 1, 1);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!Config.clientOnlyMode) {
+                                ItemCategory category = ItemCategory.get(lastHeldStack.getItem());
+                                int broadCategory = category.getBroadCategoryFlags();
+
+                                boolean doRefill = false;
+                                if ((broadCategory & ItemCategory.TOOL_FLAG) != 0 && Config.autoRefillTools)
+                                    doRefill = true;
+                                else if ((broadCategory & ItemCategory.WEAPON_FLAG) != 0 && Config.autoRefillWeapons)
+                                    doRefill = true;
+                                else if ((broadCategory & ItemCategory.CONSUMABLE_FLAG) != 0 && Config.autoRefillFood)
+                                    doRefill = true;
+                                else if ((broadCategory & ItemCategory.BLOCK_FLAG) != 0 && Config.autoRefillBlocks)
+                                    doRefill = true;
+                                else if ((broadCategory & ItemCategory.MISC_FLAG) != 0 && Config.autoRefillMisc)
+                                    doRefill = true;
+
+                                if (doRefill)
+                                    doAutoRefill(lastHeldStack);
                             }
                         }
                     }
@@ -682,6 +1059,10 @@ public class ClientStuff extends ClientAndServerStuff {
                 indexOriginal = player.inventory.currentItem;
 
             if (indexOriginal >= 0 && indexClosestMatch >= 0 && indexOriginal != indexClosestMatch) {
+
+                if (Config.enableAutoRefillSound)
+                    playSound(BAG_OPEN, minecraft.thePlayer, 0.5f, 1.2f);
+
                 int slot1 = convertInventoryIndexToSlotIndex(indexOriginal);
                 int slot2 = convertInventoryIndexToSlotIndex(indexClosestMatch);
                 sendSwapPlayerInventorySlotsToServer(slot1, slot2);
@@ -728,12 +1109,17 @@ public class ClientStuff extends ClientAndServerStuff {
             ItemCategory category2 = ItemCategory.get(item2);
 
             int similarity = 0;
-            if (item1 == item2 || item1.getUnlocalizedName().equals(item2.getUnlocalizedName()))
+            if (item1 == item2 && item1.getUnlocalizedName(a).equals(item2.getUnlocalizedName(b)))
                 similarity += 1;
-            if ((category1 == category2 && (category1 == ItemCategory.BLOCK || category1 == ItemCategory.OTHER)) && a.getItemDamage() != b.getItemDamage())
-                similarity -= 1;
             if (category1.matches(category2))
                 similarity += 1;
+
+            //if (item1 == item2 || item1.getUnlocalizedName().equals(item2.getUnlocalizedName()))
+            //    similarity += 1;
+            //if ((category1 == category2 && (category1 == ItemCategory.BLOCK || category1 == ItemCategory.OTHER)) && a.getItemDamage() != b.getItemDamage())
+            //    similarity -= 1;
+            //if (category1.matches(category2))
+            //    similarity += 1;
 
             return similarity;
         }
@@ -845,7 +1231,7 @@ public class ClientStuff extends ClientAndServerStuff {
         // BUT whenever you had an item like hot food in your inventory it would tick so fast and break this - leading
         // to item duplication and many many other problems..
 
-        if (slot1Index != slot2Index) {
+        if (!Config.clientOnlyMode && slot1Index != slot2Index) {
             int slot1 = slot1Index + 9;
             int slot2 = slot2Index + 9;
             swapPlayerInventorySlots(minecraft.thePlayer, slot1, slot2);
@@ -857,17 +1243,29 @@ public class ClientStuff extends ClientAndServerStuff {
         return Config.allowWalkInInventory && (screen instanceof GuiInventoryTFC || screen instanceof ContainerGUIWithFastBagAccess);
     }
 
-    public static void sendCycleInventoryRowsToServer(boolean cycleUp) {
-        cyclePlayerInventoryRows(minecraft.thePlayer, cycleUp);
-        ItemStack[] inventory = minecraft.thePlayer.inventory.mainInventory;
-
-        for (int i = 0; i < HOTBAR_SIZE; ++i) {
-            ItemStack stack = inventory[i];
-            if (stack != null)
-                stack.animationsToGo = 3;
+    public static void sendStackFoodToServer(int foodSlot) {
+        if (!Config.clientOnlyMode) {
+            stackPlayerFood(minecraft.thePlayer, foodSlot);
+            network.sendToServer(new StackFoodPacket(foodSlot));
         }
+    }
 
-        network.sendToServer(new CycleInventoryRowsPacket(cycleUp));
+    public static void sendCycleInventoryRowsToServer(boolean cycleUp) {
+        if (!Config.clientOnlyMode) {
+            cyclePlayerInventoryRows(minecraft.thePlayer, cycleUp);
+            ItemStack[] inventory = minecraft.thePlayer.inventory.mainInventory;
+
+            if (Config.enableHotbarCycleSound)
+                playSound(BAG_OPEN, minecraft.thePlayer, 0.8f, 1.2f);
+
+            for (int i = 0; i < HOTBAR_SIZE; ++i) {
+                ItemStack stack = inventory[i];
+                if (stack != null)
+                    stack.animationsToGo = 3;
+            }
+
+            network.sendToServer(new CycleInventoryRowsPacket(cycleUp));
+        }
     }
 
     public static int convertInventoryIndexToSlotIndex(int inventoryIndex) {
@@ -1069,6 +1467,59 @@ public class ClientStuff extends ClientAndServerStuff {
         GL11.glVertex2f(x + width, y);
 
         GL11.glEnd();
+    }
+
+    public static float getFluidViscosity(FluidStack stack) {
+        if (stack != null) {
+            Fluid fluid = stack.getFluid();
+            if (fluid != null) {
+
+                // these are all more or less completely arbitrary for now
+                if (fluid == TFCFluids.PITCH)
+                    return 10000;
+                else if (fluid == TFCFluids.WAX)
+                    return 5000;
+                else if (fluid == TFCFluids.HONEY)
+                    return 6000;
+                else
+                    return fluid.getViscosity(stack);
+            }
+        }
+
+        return -1;
+    }
+
+    public static void playFluidSound(ResourceLocation sound, ResourceLocation viscousSound, TileEntity source, float viscosity, float loudness, float pitch) {
+        final float VISCOSITY_THRESHOLD = 5000;
+        if (viscosity >= VISCOSITY_THRESHOLD)
+            playSound(viscousSound, source, loudness, pitch);
+        else
+            playSound(sound, source, loudness, pitch);
+    }
+
+    public static ISound playSound(ResourceLocation sound, float x, float y, float z, float loudness, float pitch) {
+        PositionedSoundRecord record = new PositionedSoundRecord(sound, loudness, pitch, x, y, z);
+        minecraft.getSoundHandler().playSound(record);
+        return record;
+    }
+
+    public static ISound playSound(ResourceLocation sound, TileEntity source, float loudness, float pitch) {
+        float x = source.xCoord + 0.5f;
+        float y = source.yCoord + 0.5f;
+        float z = source.zCoord + 0.5f;
+        source.updateEntity();
+        return playSound(sound, x, y, z, loudness, pitch);
+    }
+
+    public static ISound playSound(ResourceLocation sound, Entity source, float loudness, float pitch) {
+        float x = (float)source.posX + 0.5f;
+        float y = (float)source.posY + 0.5f;
+        float z = (float)source.posZ + 0.5f;
+        return playSound(sound, x, y, z, loudness, pitch);
+    }
+
+    public static void stopSound(ISound sound) {
+        minecraft.getSoundHandler().stopSound(sound);
     }
 
     public static int findFirstFreeHotbarSlotIndex() {
@@ -1317,8 +1768,46 @@ public class ClientStuff extends ClientAndServerStuff {
             }
         }
 
+        public boolean requiresExactMatch() {
+            switch (this) {
+                case AXE:
+                case KNIFE:
+                case HAMMER:
+                case SAW:
+                case HOE:
+                case PICKAXE:
+                case PRO_PICK:
+                case CHISEL:
+                case SHOVEL:
+                case SCYTHE:
+                case TROWEL:
+                case SHEARS:
+                case FIRE_STARTER:
+                case FISHING_ROD:
+                case PLASTER_BUCKET:
+                case FOOD:
+                case DRINK:
+                case LOG:
+                case ROCK:
+                case ROCK_FLAKE:
+                case SEEDS:
+                case SAPLING:
+                case CLAY:
+                case STRAW:
+                case COAL:
+                case FLOWERS:
+                    return false;
+                case CONTAINER:
+                case BLOCK:
+                case OTHER:
+                case NONE:
+                default:
+                    return true;
+            }
+        }
+
         public boolean matches(ItemCategory other) {
-            if (this == NONE || other == NONE || this == OTHER || other == OTHER || this == BLOCK || other == BLOCK)
+            if (requiresExactMatch() || other.requiresExactMatch())
                 return false;
             else
                 return this == other;
@@ -1433,6 +1922,9 @@ public class ClientStuff extends ClientAndServerStuff {
             super(player);
             backgroundFilterAlpha = Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()) ? 0 : 1;
             lastTimeNanosecs = System.nanoTime();
+
+            if (Config.enablePlayerInventorySound)
+                playSound(BAG_OPEN, minecraft.thePlayer, 0.8f, 0.8f);
         }
 
         @Override
@@ -1604,6 +2096,14 @@ public class ClientStuff extends ClientAndServerStuff {
             drawTexturedModalRect(var5, var6 + inventoryRows * 18 + 17, 0, 126, xSize, 96);
             PlayerInventory.drawInventory(this, width, height, ySize - PlayerInventory.invYSize + 10);
         }
+
+        @Override
+        public void onGuiClosed() {
+            //TODO: Sometimes the chest open sound plays when you close the chest. No idea why...
+            if (Config.enableChestClosingSound)
+                playSound(CHEST_CLOSE, minecraft.thePlayer, 0.7f, 1);
+            super.onGuiClosed();
+        }
     }
 
     public static class QuernGUIWithFastBagAccess extends GuiContainerTFC {
@@ -1635,13 +2135,34 @@ public class ClientStuff extends ClientAndServerStuff {
             beehiveTE = beehive;
             guiLeft = (width - 208) / 2;
             guiTop = (height - 198) / 2;
+
+            if (Config.enableBeehiveOpenSound)
+                playSound(BEEHIVE_OPEN, beehiveTE, 1, 1);
         }
 
         @Override
         public void handleMouseClick(Slot slot, int slotIndex, int rightClick, int shiftDown) {
             if (!doQuickAccessOnRightClick(slot, slotIndex, rightClick, shiftDown)) {
+
+                if (Config.enableBeehiveHoneySound && slot != null && slotIndex >= 0 && slotIndex < 6) { // beehive slots
+                    ItemStack stack = slot.getStack();
+                    if (stack != null) {
+                        Item item = stack.getItem();
+                        if (item == ItemSetup.honeycomb || item == ItemSetup.fertileHoneycomb) {
+                            playSound(BEEHIVE_DRIP, beehiveTE, 1, 1);
+                        }
+                    }
+                }
+
                 super.handleMouseClick(slot, slotIndex, rightClick, shiftDown);
             }
+        }
+
+        @Override
+        public void onGuiClosed() {
+            if (Config.enableBeehiveOpenSound)
+                playSound(BEEHIVE_CLOSE, beehiveTE, 1, 1);
+            super.onGuiClosed();
         }
 
         @Override
@@ -1949,6 +2470,20 @@ public class ClientStuff extends ClientAndServerStuff {
         @Override
         public void handleMouseClick(Slot slot, int slotIndex, int rightClick, int shiftDown) {
             if (!doQuickAccessOnRightClick(slot, slotIndex, rightClick, shiftDown)) {
+                if (Config.enableBarrelItemSoakSound && guiTab == 0 && slot != null && slotIndex >= 0 && barrelTE.fluid != null) {
+
+                    float viscosity = getFluidViscosity(barrelTE.fluid);
+                    ItemStack liquidStack = inventorySlots.getSlot(0).getStack();
+                    ItemStack slotStack = slot.getStack();
+                    ItemStack playerStack = player.inventory.getItemStack();
+
+                    if ((slotIndex == 0 && playerStack != null) || (liquidStack == null && slotStack != null && shiftDown != 0)) {
+                        playFluidSound(FLUID_SOAK, FLUID_SOAK_VISCOUS, barrelTE, viscosity, 1, 1);
+                    } else if (slotIndex == 0 && slotStack != null) {
+                        playFluidSound(FLUID_UNSOAK, FLUID_UNSOAK_VISCOUS, barrelTE, viscosity, 1, 1);
+                    }
+                }
+
                 super.handleMouseClick(slot, slotIndex, rightClick, shiftDown);
             }
         }
@@ -2009,20 +2544,20 @@ public class ClientStuff extends ClientAndServerStuff {
 
                 buttonList.add(new GuiButton(1, guiLeft + 88, guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Empty")));
                 if (this.barrelTE.mode == 0) {
-                    buttonList.add(new BarrelGUIWithFastBagAccess.GuiBarrelTabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOn"), 0, 204, 16, 16));
+                    buttonList.add(new TabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOn"), 0, 204, 16, 16));
                 } else if (this.barrelTE.mode == 1) {
-                    buttonList.add(new BarrelGUIWithFastBagAccess.GuiBarrelTabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOff"), 0, 188, 16, 16));
+                    buttonList.add(new TabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOff"), 0, 188, 16, 16));
                 }
 
-                buttonList.add(new BarrelGUIWithFastBagAccess.GuiBarrelTabButton(3, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
-                buttonList.add(new BarrelGUIWithFastBagAccess.GuiBarrelTabButton(4, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
+                buttonList.add(new TabButton(3, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
+                buttonList.add(new TabButton(4, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
             } else if (this.guiTab == 1) {
-                buttonList.add(new BarrelGUIWithFastBagAccess.GuiBarrelTabButton(0, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
-                buttonList.add(new BarrelGUIWithFastBagAccess.GuiBarrelTabButton(1, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
+                buttonList.add(new TabButton(0, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
+                buttonList.add(new TabButton(1, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
                 if (!this.barrelTE.getSealed()) {
-                    buttonList.add(new GuiButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Seal")));
+                    buttonList.add(new SealButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Seal")));
                 } else {
-                    buttonList.add(new GuiButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Unseal")));
+                    buttonList.add(new SealButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Unseal")));
                 }
             }
 
@@ -2037,14 +2572,25 @@ public class ClientStuff extends ClientAndServerStuff {
 
         @Override
         protected void actionPerformed(GuiButton guibutton) {
+            float loudness = 1.0f;
+            float pitch = 1.0f;
+
             if (guiTab == 0) {
                 if (guibutton.id == 0) {
                     if (!barrelTE.getSealed()) {
+                        if (Config.enableBarrelSealSound)
+                            playSound(BARREL_SEAL, barrelTE, loudness, pitch);
                         barrelTE.actionSeal(0, player);
                     } else {
+                        if (Config.enableBarrelSealSound)
+                            playSound(BARREL_UNSEAL, barrelTE, loudness, pitch);
                         barrelTE.actionUnSeal(0, player);
                     }
                 } else if (guibutton.id == 1) {
+                    if (Config.enableBarrelEmptySound && barrelTE.fluid != null) {
+                        float viscosity = getFluidViscosity(barrelTE.fluid);
+                        playFluidSound(FLUID_EMPTY, FLUID_EMPTY_VISCOUS, barrelTE, viscosity, 1, 1);
+                    }
                     barrelTE.actionEmpty();
                 } else if (guibutton.id == 2) {
                     barrelTE.actionMode();
@@ -2057,15 +2603,16 @@ public class ClientStuff extends ClientAndServerStuff {
                     barrelTE.actionSwitchTab(0, player);
                 } else if (guibutton.id == 2) {
                     if (!barrelTE.getSealed()) {
+                        playSound(BARREL_SEAL, barrelTE, loudness, pitch);
                         barrelTE.actionSeal(1, player);
                     } else {
+                        playSound(BARREL_UNSEAL, barrelTE, loudness, pitch);
                         barrelTE.actionUnSeal(1, player);
                     }
 
                     this.createButtons();
                 }
             }
-
         }
 
         @Override
@@ -2169,7 +2716,7 @@ public class ClientStuff extends ClientAndServerStuff {
             GL11.glEnable(2929);
         }
 
-        public static class GuiBarrelTabButton extends GuiButton {
+        public static class TabButton extends GuiButton {
             public BarrelGUIWithFastBagAccess screen;
             public IIcon buttonicon;
             public int xPos;
@@ -2177,13 +2724,13 @@ public class ClientStuff extends ClientAndServerStuff {
             public int xSize = 31;
             public int ySize = 15;
 
-            public GuiBarrelTabButton(int index, int xPos, int yPos, int width, int height, BarrelGUIWithFastBagAccess gui, IIcon icon, String s) {
+            public TabButton(int index, int xPos, int yPos, int width, int height, BarrelGUIWithFastBagAccess gui, IIcon icon, String s) {
                 super(index, xPos, yPos, width, height, s);
                 this.screen = gui;
                 this.buttonicon = icon;
             }
 
-            public GuiBarrelTabButton(int index, int xPos, int yPos, int width, int height, BarrelGUIWithFastBagAccess gui, String s, int xp, int yp, int xs, int ys) {
+            public TabButton(int index, int xPos, int yPos, int width, int height, BarrelGUIWithFastBagAccess gui, String s, int xp, int yp, int xs, int ys) {
                 super(index, xPos, yPos, width, height, s);
                 this.screen = gui;
                 this.xPos = xp;
@@ -2216,6 +2763,18 @@ public class ClientStuff extends ClientAndServerStuff {
 
             }
         }
+
+        public static class SealButton extends GuiButton {
+            public SealButton(int index, int x, int y, int width, int height, String text) {
+                super(index, x, y, width, height, text);
+            }
+
+            @Override
+            public void func_146113_a(SoundHandler p_146113_1_) {
+                // Don't play any sound..
+                //TODO: This doesn't seem to actually stop the button click sound from playing...
+            }
+        }
     }
 
     public static class LargeVesselGUIWithFastBagAccess extends GuiContainerTFC {
@@ -2237,6 +2796,20 @@ public class ClientStuff extends ClientAndServerStuff {
         @Override
         public void handleMouseClick(Slot slot, int slotIndex, int rightClick, int shiftDown) {
             if (!doQuickAccessOnRightClick(slot, slotIndex, rightClick, shiftDown)) {
+                if (Config.enableLargeVesselItemSoakSound && guiTab == 0 && slot != null && slotIndex >= 0 && vesselTE.fluid != null) {
+
+                    float viscosity = getFluidViscosity(vesselTE.fluid);
+                    ItemStack liquidStack = inventorySlots.getSlot(0).getStack();
+                    ItemStack slotStack = slot.getStack();
+                    ItemStack playerStack = player.inventory.getItemStack();
+
+                    if ((slotIndex == 0 && playerStack != null) || (liquidStack == null && slotStack != null && shiftDown != 0)) {
+                        playFluidSound(FLUID_SOAK, FLUID_SOAK_VISCOUS, vesselTE, viscosity, 1, 1);
+                    } else if (slotIndex == 0 && slotStack != null) {
+                        playFluidSound(FLUID_UNSOAK, FLUID_UNSOAK_VISCOUS, vesselTE, viscosity, 1, 1);
+                    }
+                }
+
                 super.handleMouseClick(slot, slotIndex, rightClick, shiftDown);
             }
         }
@@ -2298,23 +2871,22 @@ public class ClientStuff extends ClientAndServerStuff {
 
                 buttonList.add(new GuiButton(1, guiLeft + 88, guiTop + 50, 50, 20, TFC_Core.translate("gui.Barrel.Empty")));
                 if (vesselTE.mode == 0) {
-                    buttonList.add(new GuiBarrelTabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOn"), 0, 204, 16, 16));
+                    buttonList.add(new TabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOn"), 0, 204, 16, 16));
                 } else if (vesselTE.mode == 1) {
-                    buttonList.add(new GuiBarrelTabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOff"), 0, 188, 16, 16));
+                    buttonList.add(new TabButton(2, guiLeft + 39, guiTop + 29, 16, 16, this, TFC_Core.translate("gui.Barrel.ToggleOff"), 0, 188, 16, 16));
                 }
 
-                buttonList.add(new GuiBarrelTabButton(3, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
-                buttonList.add(new GuiBarrelTabButton(4, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
+                buttonList.add(new TabButton(3, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
+                buttonList.add(new TabButton(4, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
             } else if (guiTab == 1) {
-                buttonList.add(new GuiBarrelTabButton(0, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
-                buttonList.add(new GuiBarrelTabButton(1, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
+                buttonList.add(new TabButton(0, guiLeft + 36, guiTop - 12, 31, 15, this, TFC_Textures.guiSolidStorage, TFC_Core.translate("gui.Barrel.Solid")));
+                buttonList.add(new TabButton(1, guiLeft + 5, guiTop - 12, 31, 15, this, TFC_Textures.guiLiquidStorage, TFC_Core.translate("gui.Barrel.Liquid")));
                 if (!vesselTE.getSealed()) {
-                    buttonList.add(new GuiButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Seal")));
+                    buttonList.add(new BarrelGUIWithFastBagAccess.SealButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Seal")));
                 } else {
-                    buttonList.add(new GuiButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Unseal")));
+                    buttonList.add(new BarrelGUIWithFastBagAccess.SealButton(2, guiLeft + 6, guiTop + 33, 44, 20, TFC_Core.translate("gui.Barrel.Unseal")));
                 }
             }
-
         }
 
         @Override
@@ -2326,14 +2898,26 @@ public class ClientStuff extends ClientAndServerStuff {
 
         @Override
         public void actionPerformed(GuiButton guibutton) {
+
+            float loudness = 1;
+            float pitch = 1;
+
             if (guiTab == 0) {
                 if (guibutton.id == 0) {
                     if (!vesselTE.getSealed()) {
+                        if (Config.enableLargeVesselSealSound)
+                            playSound(LARGE_VESSEL_SEAL, vesselTE, loudness, pitch);
                         vesselTE.actionSeal(0, player);
                     } else {
+                        if (Config.enableLargeVesselSealSound)
+                            playSound(LARGE_VESSEL_UNSEAL, vesselTE, loudness, pitch);
                         vesselTE.actionUnSeal(0, player);
                     }
                 } else if (guibutton.id == 1) {
+                    if (Config.enableLargeVesselEmptySound && vesselTE.fluid != null) {
+                        float viscosity = getFluidViscosity(vesselTE.fluid);
+                        playFluidSound(FLUID_EMPTY, FLUID_EMPTY_VISCOUS, vesselTE, viscosity, 1, 1);
+                    }
                     vesselTE.actionEmpty();
                 } else if (guibutton.id == 2) {
                     vesselTE.actionMode();
@@ -2347,14 +2931,15 @@ public class ClientStuff extends ClientAndServerStuff {
                 } else if (guibutton.id == 2) {
                     if (!vesselTE.getSealed()) {
                         vesselTE.actionSeal(1, player);
+                        playSound(LARGE_VESSEL_SEAL, vesselTE, loudness, pitch);
                     } else {
                         vesselTE.actionUnSeal(1, player);
+                        playSound(LARGE_VESSEL_UNSEAL, vesselTE, loudness, pitch);
                     }
 
                     createButtons();
                 }
             }
-
         }
 
         @Override
@@ -2472,7 +3057,7 @@ public class ClientStuff extends ClientAndServerStuff {
             GL11.glEnable(2929);
         }
 
-        public static class GuiBarrelTabButton extends GuiButton {
+        public static class TabButton extends GuiButton {
             private LargeVesselGUIWithFastBagAccess screen;
             private IIcon buttonicon;
             private int xPos;
@@ -2480,13 +3065,13 @@ public class ClientStuff extends ClientAndServerStuff {
             private int xSize = 31;
             private int ySize = 15;
 
-            public GuiBarrelTabButton(int index, int xPos, int yPos, int width, int height, LargeVesselGUIWithFastBagAccess gui, IIcon icon, String s) {
+            public TabButton(int index, int xPos, int yPos, int width, int height, LargeVesselGUIWithFastBagAccess gui, IIcon icon, String s) {
                 super(index, xPos, yPos, width, height, s);
                 screen = gui;
                 buttonicon = icon;
             }
 
-            public GuiBarrelTabButton(int index, int xPos, int yPos, int width, int height, LargeVesselGUIWithFastBagAccess gui, String s, int xp, int yp, int xs, int ys) {
+            public TabButton(int index, int xPos, int yPos, int width, int height, LargeVesselGUIWithFastBagAccess gui, String s, int xp, int yp, int xs, int ys) {
                 super(index, xPos, yPos, width, height, s);
                 this.xPos = xp;
                 this.yPos = yp;

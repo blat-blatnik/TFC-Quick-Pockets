@@ -3,6 +3,8 @@
 
 package tfcquickpockets;
 
+import com.dunk.tfc.Food.ItemFoodTFC;
+import com.dunk.tfc.api.Food;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
@@ -35,8 +37,213 @@ public class ClientAndServerStuff {
         network.registerMessage(SwapInventorySlotsPacket.Handler.class, SwapInventorySlotsPacket.class, 1, Side.SERVER);
         network.registerMessage(CycleInventoryRowsPacket.Handler.class, CycleInventoryRowsPacket.class, 2, Side.CLIENT);
         network.registerMessage(CycleInventoryRowsPacket.Handler.class, CycleInventoryRowsPacket.class, 3, Side.SERVER);
-
+        network.registerMessage(StackFoodPacket.Handler.class, StackFoodPacket.class, 4, Side.CLIENT);
+        network.registerMessage(StackFoodPacket.Handler.class, StackFoodPacket.class, 5, Side.SERVER);
         MinecraftForge.EVENT_BUS.register(new ServerEventHandler());
+    }
+
+    //public static ItemStack processFoodInput(EntityPlayer player, ItemStack craftResult, IInventory craftingInv) {
+    //    float finalWeight = 0;
+    //    byte inputWaterLoss = 0;
+    //    float finalDecay = 0;
+    //    int[] fuelTasteProfile = { 0, 0, 0, 0, 0 };
+    //    int[] cookedTasteProfile = { 0, 0, 0, 0, 0 };
+    //    float cookedTime = 0;
+    //    int foodCount = 0;
+    //    int itemCount = 0;
+    //    int foodSlot = 0;
+    //    for (int i = 0; i < craftingInv.getSizeInventory(); ++i) {
+    //        ItemStack itemstack = craftingInv.getStackInSlot(i);
+    //        if (itemstack != null) {
+    //            ++itemCount;
+    //            if (itemstack.getItem() instanceof ItemFoodTFC && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("foodWeight")) {
+    //                foodSlot = i;
+    //                if (foodCount == 0) {
+    //                    fuelTasteProfile = Food.getFuelProfile(itemstack);
+    //                    cookedTasteProfile = Food.getCookedProfile(itemstack);
+    //                    cookedTime = Food.getCooked(itemstack);
+    //                }
+    //                float inputWeight = Food.getWeight(itemstack);
+    //                inputWaterLoss = Food.getWaterLoss(itemstack);
+    //                Food.setWaterLoss(craftResult, inputWaterLoss);
+    //                float oldInputWeight = inputWeight;
+    //                float inputDecayPercent = Food.getDecay(itemstack) / inputWeight;
+    //                float inputDecay = Food.getDecay(itemstack);
+    //                float weightChange = 0;
+    //                if (finalWeight < 160 && Food.isSameSmoked(cookedTasteProfile, Food.getCookedProfile(itemstack)) && Food.isSameSmoked(fuelTasteProfile, Food.getFuelProfile(itemstack)) && ((int)Food.getCooked(itemstack) - 600) / 120 == ((int)cookedTime - 600) / 120) {
+    //                    weightChange = Math.min(160 - finalWeight, inputWeight);
+    //                    inputWeight -= weightChange;
+    //                    finalWeight += weightChange;
+    //                }
+    //                if (inputWeight != oldInputWeight) {
+    //                    if (inputWeight == 0) {
+    //                        if (finalDecay < 0) {
+    //                            if (inputDecay > finalDecay) {
+    //                                finalDecay = inputDecay;
+    //                            }
+    //                        } else {
+    //                            finalDecay += inputDecay;
+    //                        }
+    //                    } else {
+    //                        float decayChange = weightChange * inputDecayPercent;
+    //                        inputDecay -= decayChange;
+    //                        if (finalDecay < 0) {
+    //                            if (decayChange > finalDecay) {
+    //                                finalDecay = decayChange;
+    //                            }
+    //                        } else {
+    //                            finalDecay += decayChange;
+    //                        }
+    //                    }
+    //                    ++foodCount;
+    //                }
+    //                if (inputWeight > 0) {
+    //                    Food.setWeight(itemstack, inputWeight);
+    //                    Food.setDecay(itemstack, inputDecay);
+    //                    Food.setWaterLoss(itemstack, inputWaterLoss);
+    //                    ++itemstack.stackSize;
+    //                    if (itemstack.stackSize > 2) {
+    //                        itemstack.stackSize = 2;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //    if (craftResult.stackSize == 0) {
+    //        craftResult.stackSize = 1;
+    //    }
+    //    if (itemCount == 1) {
+    //        if (finalDecay > 0.0F) {
+    //            for (int i = 0; i < player.inventory.getSizeInventory(); ++i) {
+    //                ItemStack itemstack = player.inventory.getStackInSlot(i);
+    //                if (itemstack != null && itemstack.getItem() instanceof ItemKnife) {
+    //                    itemstack.damageItem(1, player);
+    //                    if (itemstack.getItemDamage() >= itemstack.getMaxDamage()) {
+    //                        player.inventory.setInventorySlotContents(i, (ItemStack)null);
+    //                    }
+    //                    break;
+    //                }
+    //            }
+    //        }
+    //    } else {
+    //        for (int i = 0; i < craftingInv.getSizeInventory(); ++i) {
+    //            ItemStack itemstack = craftingInv.getStackInSlot(i);
+    //            if (itemstack != null) {
+    //                boolean fullInv = isInvFull(player);
+    //                if (itemstack.getItem() instanceof ItemKnife && fullInv && !preCrafted) {
+    //                    ++itemstack.stackSize;
+    //                    if (itemstack.stackSize > 2) {
+    //                        itemstack.stackSize = 2;
+    //                    }
+    //                }
+    //                if (itemstack.getItem() instanceof ItemKnife && (!fullInv || !preCrafted)) {
+    //                    if (finalDecay > 0.0F) {
+    //                        damageItem(player, craftingInv, i, itemstack.getItem());
+    //                    } else if (finalDecay <= 0.0F) {
+    //                        if (finalWeight / 2.0F < 1.0F) {
+    //                            ++itemstack.stackSize;
+    //                            if (itemstack.stackSize > 2) {
+    //                                itemstack.stackSize = 2;
+    //                            }
+    //                        } else {
+    //                            damageItem(player, craftingInv, i, itemstack.getItem());
+    //                            Food.setWeight(craftingInv.getStackInSlot(foodSlot), Helper.roundNumber(finalWeight / 2.0F, 100.0F));
+    //                            Food.setWaterLoss(craftingInv.getStackInSlot(foodSlot), inputWaterLoss);
+    //                            ++craftingInv.getStackInSlot(foodSlot).stackSize;
+    //                            if (craftingInv.getStackInSlot(foodSlot).stackSize > 2) {
+    //                                craftingInv.getStackInSlot(foodSlot).stackSize = 2;
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //    return craftResult;
+    //}
+
+    public static boolean isFood(ItemStack stack) {
+        if (stack != null && stack.getItem() != null) {
+            Item item = stack.getItem();
+            return item instanceof ItemFoodTFC && stack.hasTagCompound() && stack.getTagCompound().hasKey("foodWeight");
+        } else
+            return false;
+    }
+
+    public static boolean isSameFood(int[] taste1, int[] fuel1, int[] cooked1, int cookCategory1, int[] taste2, int[] fuel2, int[] cooked2, int cookCategory2) {
+        return
+                cookCategory1 == cookCategory2 &&
+                Food.isSameSmoked(taste1, taste2) &&
+                Food.isSameSmoked(fuel1, fuel2) &&
+                Food.isSameSmoked(cooked1, cooked2);
+    }
+
+    // adapted from com.dunk.tfc.Handlers.FoodCraftingHandler
+    public static void stackPlayerFood(EntityPlayer player, int inputFoodSlot) {
+        if (player != null) {
+            Container inventory = player.inventoryContainer;
+            if (inputFoodSlot >= 9 && inputFoodSlot < 9 + 4 * 9) {
+
+                ItemStack inputFoodStack = inventory.getSlot(inputFoodSlot).getStack();
+                if (isFood(inputFoodStack)) {
+
+                    int[] inputTaste = Food.getFoodTasteProfile(inputFoodStack);
+                    int[] inputFuelTaste = Food.getFuelProfile(inputFoodStack);
+                    int[] inputCookedTaste = Food.getCookedProfile(inputFoodStack);
+                    int inputCookCategory = ((int)Food.getCooked(inputFoodStack) - 600) / 120;
+                    float inputWeight = Food.getWeight(inputFoodStack);
+                    float inputDecay = Food.getDecay(inputFoodStack);
+                    float inputDecayFraction = inputDecay / inputWeight;
+
+                    for (int i = 9; i < 9 + 4 * 9 && inputWeight > 0; ++i) {
+
+                        // this is just so that we stack in the hotbar first - and then in the rest of the inventory
+                        int foodSlot = i;
+                        if (foodSlot < 9 + 9)
+                            foodSlot += 3 * 9;
+                        else if (foodSlot >= 9 + 3 * 9)
+                            foodSlot -= 3 * 9;
+
+                        if (foodSlot != inputFoodSlot) {
+                            ItemStack foodStack = inventory.getSlot(foodSlot).getStack();
+                            if (isFood(foodStack)) {
+
+                                int[] taste = Food.getFoodTasteProfile(foodStack);
+                                int[] fuelTaste = Food.getFuelProfile(foodStack);
+                                int[] cookedTaste = Food.getCookedProfile(foodStack);
+                                int cookCategory = ((int)Food.getCooked(foodStack) - 600) / 120;
+                                float weight = Food.getWeight(foodStack);
+                                float decay = Food.getDecay(foodStack);
+
+                                if (weight < 160 && isSameFood(taste, fuelTaste, cookedTaste, cookCategory, inputTaste, inputFuelTaste, inputCookedTaste, inputCookCategory)) {
+                                    float newWeight = Math.min(weight + inputWeight, 160);
+                                    float weightChange = newWeight - weight;
+                                    float inputWeightChangeFraction = weightChange / inputWeight;
+                                    float newDecay = decay + inputDecay * inputWeightChangeFraction;
+                                    Food.setWeight(foodStack, newWeight);
+                                    Food.setDecay(foodStack, newDecay);
+                                    inventory.putStackInSlot(foodSlot, foodStack); // probably don't need to do this
+
+                                    inputWeight -= weightChange;
+                                    inputDecay -= weightChange * inputDecayFraction;
+                                    // change water loss??
+                                    if (inputWeight < 1e-3) // floating-point rounding nonsense
+                                        inputWeight = 0;
+                                }
+                            }
+                        }
+                    }
+
+                    if (inputWeight > 0) { // still have some leftover food
+                        Food.setWeight(inputFoodStack, inputWeight);
+                        Food.setDecay(inputFoodStack, inputDecay);
+                        inventory.putStackInSlot(inputFoodSlot, inputFoodStack);
+                    } else {
+                        inventory.putStackInSlot(inputFoodSlot, null);
+                    }
+                }
+            }
+        }
     }
 
     public static void swapPlayerInventorySlots(EntityPlayer player, int slot1, int slot2) {
@@ -100,6 +307,45 @@ public class ClientAndServerStuff {
         }
     }
 
+    public static class StackFoodPacket implements IMessage {
+        public int foodSlotIndex;
+
+        @SuppressWarnings("unused")
+        public StackFoodPacket() {}
+
+        public StackFoodPacket(int foodSlotIndex) {
+            this.foodSlotIndex = foodSlotIndex;
+        }
+
+        @Override
+        public void fromBytes(ByteBuf bytes) {
+            foodSlotIndex = bytes.getByte(0);
+        }
+
+        @Override
+        public void toBytes(ByteBuf bytes) {
+            bytes.writeByte(foodSlotIndex);
+        }
+
+        public static class Handler implements IMessageHandler<StackFoodPacket, IMessage> {
+            @Override
+            public IMessage onMessage(StackFoodPacket stackFood, MessageContext context) {
+                if (context.side.isServer()) {
+                    try {
+                        int slot = stackFood.foodSlotIndex;
+                        EntityPlayer player = context.getServerHandler().playerEntity;
+                        stackPlayerFood(player, slot);
+                        Container inventory = player.inventoryContainer;
+                        inventory.detectAndSendChanges();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return null;
+            }
+        }
+    }
+
     public static class SwapInventorySlotsPacket implements IMessage {
         public int slotIndex1;
         public int slotIndex2;
@@ -131,8 +377,9 @@ public class ClientAndServerStuff {
                     try {
                         int slot1 = swapSlots.slotIndex1;
                         int slot2 = swapSlots.slotIndex2;
-                        swapPlayerInventorySlots(context.getServerHandler().playerEntity, slot1, slot2);
-                        Container inventory = context.getServerHandler().playerEntity.inventoryContainer;
+                        EntityPlayer player = context.getServerHandler().playerEntity;
+                        swapPlayerInventorySlots(player, slot1, slot2);
+                        Container inventory = player.inventoryContainer;
                         inventory.detectAndSendChanges();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -168,8 +415,9 @@ public class ClientAndServerStuff {
             public IMessage onMessage(CycleInventoryRowsPacket cycleSlots, MessageContext context) {
                 if (context.side.isServer()) {
                     try {
-                        cyclePlayerInventoryRows(context.getServerHandler().playerEntity, cycleSlots.cycleUp);
-                        Container inventory = context.getServerHandler().playerEntity.inventoryContainer;
+                        EntityPlayer player = context.getServerHandler().playerEntity;
+                        cyclePlayerInventoryRows(player, cycleSlots.cycleUp);
+                        Container inventory = player.inventoryContainer;
                         inventory.detectAndSendChanges();
                     } catch (Exception e) {
                         e.printStackTrace();

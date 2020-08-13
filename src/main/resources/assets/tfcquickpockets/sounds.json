@@ -1,0 +1,258 @@
+{
+  "bag.open": {
+    "category": "player",
+    "sounds": [
+      "bag-open-1",
+      "bag-open-2"
+    ]
+  },
+
+  "leash.place": {
+    "category": "block",
+    "sounds": [
+      "leash-place-1",
+      "leash-place-2",
+      "leash-place-3"
+    ]
+  },
+
+  "leash.break": {
+    "category": "block",
+    "sounds": [
+      "leash-break-1",
+      "leash-break-2",
+      "leash-break-3"
+    ]
+  },
+
+  "fire.crackle": {
+    "category": "block",
+    "sounds": [
+      "fire-crackle-1",
+      "fire-crackle-2",
+      "fire-crackle-3",
+      "fire-crackle-4",
+      "fire-crackle-5",
+      "fire-crackle-6"
+    ]
+  },
+
+  "attack.axe": {
+    "category": "player",
+    "sounds": [
+      "attack-axe-1",
+      "attack-axe-2",
+      "attack-axe-3"
+    ]
+  },
+
+  "attack.mace": {
+    "category": "player",
+    "sounds": [
+      "attack-mace-1",
+      "attack-mace-2",
+      "attack-mace-3",
+      "attack-mace-4"
+    ]
+  },
+
+  "attack.sword": {
+    "category": "player",
+    "sounds": [
+      "attack-sword-1",
+      "attack-sword-2",
+      "attack-sword-3",
+      "attack-sword-4",
+      "attack-sword-5",
+      "attack-sword-6",
+      "attack-sword-7"
+    ]
+  },
+
+  "attack.strong": {
+    "category": "player",
+    "sounds": [
+      "attack-strong-1",
+      "attack-strong-2",
+      "attack-strong-3",
+      "attack-strong-4",
+      "attack-strong-5"
+    ]
+  },
+
+  "attack.weak": {
+    "category": "player",
+    "sounds": [
+      "attack-weak-1",
+      "attack-weak-2",
+      "attack-weak-3",
+      "attack-weak-4"
+    ]
+  },
+
+  "bow.nock": {
+    "category": "player",
+    "sounds": [
+      "bow-nock"
+    ]
+  },
+
+  "bucket.fill": {
+    "category": "block",
+    "sounds": [
+      "bucket-fill-1",
+      "bucket-fill-2",
+      "bucket-fill-3"
+    ]
+  },
+
+  "bucket.fill.viscous": {
+    "category": "block",
+    "sounds": [
+      "bucket-fill-viscous-1",
+      "bucket-fill-viscous-2",
+      "bucket-fill-viscous-3"
+    ]
+  },
+
+  "bucket.empty": {
+    "category": "block",
+    "sounds": [
+      "bucket-empty-1",
+      "bucket-empty-2",
+      "bucket-empty-3"
+    ]
+  },
+
+  "bucket.empty.viscous": {
+    "category": "block",
+    "sounds": [
+      "bucket-empty-viscous-1",
+      "bucket-empty-viscous-2",
+      "bucket-empty-viscous-3"
+    ]
+  },
+
+  "fluid.soak": {
+    "category": "block",
+    "sounds": [
+      "fluid-soak-1",
+      "fluid-soak-2",
+      "fluid-soak-3"
+    ]
+  },
+
+  "cow.milk": {
+    "category": "block",
+    "sounds": [
+      "cow-milk-1",
+      "cow-milk-2",
+      "cow-milk-3"
+    ]
+  },
+
+  "fluid.soak.viscous": {
+    "category": "block",
+    "sounds": [
+      "fluid-soak-viscous-1",
+      "fluid-soak-viscous-2"
+    ]
+  },
+
+  "fluid.unsoak": {
+    "category": "block",
+    "sounds": [
+      "fluid-unsoak-1",
+      "fluid-unsoak-2",
+      "fluid-unsoak-3"
+    ]
+  },
+
+  "fluid.unsoak.viscous": {
+    "category": "block",
+    "sounds": [
+      "fluid-unsoak-viscous-1",
+      "fluid-unsoak-viscous-2",
+      "fluid-unsoak-viscous-3"
+    ]
+  },
+
+  "fluid.empty": {
+    "category": "block",
+    "sounds": [
+      "fluid-empty-1",
+      "fluid-empty-2"
+    ]
+  },
+
+  "fluid.empty.viscous": {
+    "category": "block",
+    "sounds": [
+      "fluid-empty-viscous"
+    ]
+  },
+
+  "barrel.unseal": {
+    "category": "block",
+    "sounds": [
+      "barrel-unseal-1",
+      "barrel-unseal-2"
+    ]
+  },
+
+  "barrel.seal": {
+    "category": "block",
+    "sounds": [
+      "barrel-seal"
+    ]
+  },
+
+  "large.vessel.unseal": {
+    "category": "block",
+    "sounds": [
+      "large-vessel-unseal"
+    ]
+  },
+
+  "large.vessel.seal": {
+    "category": "block",
+    "sounds": [
+      "large-vessel-seal"
+    ]
+  },
+
+  "beehive.open": {
+    "category": "block",
+    "sounds": [
+      "beehive-open"
+    ]
+  },
+
+  "beehive.close": {
+    "category": "block",
+    "sounds": [
+      "beehive-close"
+    ]
+  },
+
+  "beehive.drip": {
+    "category": "block",
+    "sounds": [
+      "beehive-drip-1",
+      "beehive-drip-2",
+      "beehive-drip-3",
+      "beehive-drip-4",
+      "beehive-drip-5",
+      "beehive-drip-6"
+    ]
+  },
+
+  "chest.close": {
+    "category": "block",
+    "sounds": [
+      "chest-close-1",
+      "chest-close-2",
+      "chest-close-3"
+    ]
+  }
+}
