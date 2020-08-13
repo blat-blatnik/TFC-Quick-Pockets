@@ -47,7 +47,9 @@ Note that it wouldn't make much sense to allow the player to move around while i
 
 ### Additional Sounds
 
-Minecraft 1.7.10 is oddly quiet, especially compared to the newer versions of minecraft. There are no bucket sounds, no weapon sounds, not even a chest closing sound. This addon adds these newer sounds back in, along with additional TFC+ specific sounds. For a full list of added sounds, as well as the volume sliders that control them, expand the list below.
+Minecraft 1.7.10 is oddly quiet, especially compared to the newer versions of minecraft. There are no bucket sounds, no weapon sounds, not even a chest closing sound. This addon adds these newer sounds back in, along with additional TFC+ specific sounds. 
+
+For a full list of added sounds, as well as the volume sliders that control them, expand the list below.
 
 <details>
   <summary>Click to expand.</summary>
@@ -86,7 +88,7 @@ Minecraft 1.7.10 is oddly quiet, especially compared to the newer versions of mi
 
 </details>
 
-Note that I do not take credit for making the sounds themselves. The credits for each sound are listed above.
+_I do not take credit for making the sounds themselves. The credits for each sound are listed above._
 
 ### Waterskin Fix
 
