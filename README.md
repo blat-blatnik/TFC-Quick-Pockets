@@ -41,7 +41,7 @@ These hotkeys are not bound to anything by default, but you can bind them yourse
 
 ### Walk in Inventory
 
-Have you ever found it kind of strange how your character cannot move at all while your inventory screen is open. Well if this ever bothered you before, this mod allows you to run and jump inside of your inventory screen when you hold the sprint key. Be free.
+Have you ever found it kind of strange how your character cannot move at all while your inventory screen is open. Well if this ever bothered you before, this mod allows you to run and jump inside of your inventory screen when you hold the <kbd>SPRINT</kbd> key. Be free.
 
 Note that it wouldn't make much sense to allow the player to move around while inspecting a chest's inventory, so this feature only works for the player inventory, as well as for container inventories for containers that you can carry around with you, like the small vessel and the leather bag.
 
@@ -173,3 +173,21 @@ Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/
 All features of this addon that move items around in the inventory require server support to function. If you want to play with this addon on a server that does not have it installed, you need to enable "Client Only Mode" from the config menu. _If you do not do this you could crash the game, or the server itself._
 
 **Note** This mod manipulates your inventory. Even though it was tested somewhat thoroughly by this point some problems may still have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
+
+## Version History
+
+<details>
+  <summary>Click to expand.</summary>
+
+|version|TFC+ versions|changes|
+|:-----:|:-----------:|:------|
+|[1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1)|0.84.1 -- 0.85.3|• added additional sounds<br>• food is now automatically stacked when picked up<br>• improved how auto-refill looks for replacement items<br>• added client-side only mode for playing on servers<br>• "remove dark filter in inventory" is now turned off by default|
+|[1.0](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0)|0.84.1 -- 0.85.2|• fixed inconsistencies with large vessel and basket GUI|
+|[beta 1.2.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2.2-beta)|0.84.1 -- 0.85.2|• improved how auto-refill looks for replacement items<br>• added config option to enable walk in inventory without the <kbd>SPRINT</kbd> key|
+|[beta 1.2.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2.1-beta)|0.84.1 -- 0.85.2|• you now have to hold <kbd>SPRINT</kbd> to walk in the inventory|
+|[beta 1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2-beta)|0.84.1 -- 0.85.1|• can now walk in inventory screens<br>• organized config into neat categories|
+|[beta 1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1-beta)|0.84.1 -- 0.85.1|• tool cycling now correctly cycles through all tools<br>• zombies and spiders no longer drop rotten flesh and spider eyes<br>• added auto-refill|
+|[beta 1.0.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0.1-beta)|0.84.1 -- 0.85.1|• fixed item duplication and other item temperature related weirdness<br>• added config options to disable quick container access on certain items<br>• most features now require server assistance to work|
+|[beta 1.0](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0-beta)|0.84.1 -- 0.85.1|initial release|
+
+</details>
