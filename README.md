@@ -45,6 +45,49 @@ Have you ever found it kind of strange how your character cannot move at all whi
 
 Note that it wouldn't make much sense to allow the player to move around while inspecting a chest's inventory, so this feature only works for the player inventory, as well as for container inventories for containers that you can carry around with you, like the small vessel and the leather bag.
 
+### Additional Sounds
+
+Minecraft 1.7.10 is oddly quiet, especially compared to the newer versions of minecraft. There are no bucket sounds, no weapon sounds, not even a chest closing sound. This addon adds these newer sounds back in, along with additional TFC+ specific sounds. For a full list of added sounds, as well as the volume sliders that control them, expand the list below.
+
+<details>
+  <summary>Click to expand.</summary>
+ 
+|sound|variants|when it plays|volume slider|source|
+|:--- |:------:|:------------|:-----------:|:----:|
+|attack-axe|3|when dealing damage with an axe|Players|[Minecraft](https://minecraft.gamepedia.com/Sword#Sounds)|
+|attack-mace|4|when dealing damage with a mace|Players|[Minecraft](https://minecraft.gamepedia.com/Sword#Sounds)|
+|attack-sword|7|when dealing damage with a sword|Players|[Minecraft](https://minecraft.gamepedia.com/Sword#Sounds)|
+|attack-strong|5|when dealing damage with a tool|Players|[Minecraft](https://minecraft.gamepedia.com/Sword#Sounds)|
+|attack-weak|4|when dealing damage with anything except the above|Players|[Minecraft](https://minecraft.gamepedia.com/Sword#Sounds)|
+|bag-open|2|when changing hotbar slots, opening player inventory, or cycling through hotbar rows|Players|[MAtmos](https://www.curseforge.com/minecraft/mc-mods/matmos)|
+|barrel-seal|1|when sealing a barrel|Blocks|[Minecraft](https://minecraft.gamepedia.com/Barrel#Sounds)|
+|barrel-unseal|2|when unsealing a barrel|Blocks|[Minecraft](https://minecraft.gamepedia.com/Barrel#Sounds)|
+|beehive-close|1|when closing a beehive's inventory|Blocks|[Minecraft](https://minecraft.gamepedia.com/Beehive#Sounds)|
+|beehive-drip|6|when taking honey from a beehive|Blocks|[Minecraft](https://minecraft.gamepedia.com/Beehive#Sounds)|
+|beehive-open|1|when opening a beehive's inventory|Blocks|[Minecraft](https://minecraft.gamepedia.com/Beehive#Sounds)|
+|bow-nock|1|when charging the bow|Players|[MAtmos](https://www.curseforge.com/minecraft/mc-mods/matmos)|
+|bucket-empty|3|when emptying a bucket|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|bucket-empty-viscous|3|when emptying a bucket with a viscous fluid such as pitch|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|bucket-fill|3|when filling a bucket|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|bucket-fill-viscous|3|when filling a bucket with a viscous fluid such as pitch|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|chest-close|3|when closing a chest|Blocks|[Minecraft](https://minecraft.gamepedia.com/Chest#Sounds)|
+|cow-milk|3|when miling a cow|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|fire-crackle|6|when near a lit fire pit|Blocks|[Minecraft](https://minecraft.gamepedia.com/Campfire#Sounds)|
+|fluid-empty|2|when emptying a barrel|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|fluid-empty-viscous|1|when emptying a barrel full of viscous fluid such as pitch|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|fluid-soak|3|when placing an item in a barrel full of liquid|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|fluid-soak-viscous|2|when placing an item in a barrel full of a viscous liquid|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|fluid-unsoak|3|when taking an item from a barrel full of liquid|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|fluid-unsoak-viscous|3|when taking an item from a barrel full of a viscous liquid|Blocks|[Minecraft](https://minecraft.gamepedia.com/Bucket#Sounds)|
+|large-vessel-seal|1|when sealing a large vessel|Blocks|[freesound.org](https://freesound.org/people/ahill86/sounds/206145/)|
+|large-vessel-unseal|1|when unsealing a large vessel|Blocks|[freesound.org](https://freesound.org/people/ahill86/sounds/206145/)|
+|leash-break|3|when a lead/rope breaks|Blocks|[Minecraft](https://minecraft.gamepedia.com/Lead#Sounds)|
+|leash-place|3|when attaching a lead/rope to a fence|Blocks|[Minecraft](https://minecraft.gamepedia.com/Lead#Sounds)|
+
+</details>
+
+Note that I do not take credit for making the sounds themselves. The credits for each sound are listed above.
+
 ### Waterskin Fix
 
 <p align="left">
@@ -123,6 +166,8 @@ After it has finished, the mod you built should be in the `./build/libs/` direct
 
 Download the latest version [here](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases). 
 
-Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.85.2. 
+Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.85.3. 
+
+All features of this addon that move items around in the inventory require server support to function. If you want to play with this addon on a server that does not have it installed, you need to enable "Client Only Mode" from the config menu. _If you do not do this you could crash the game, or the server itself._
 
 **Note** This mod manipulates your inventory. Even though it was tested somewhat thoroughly by this point some problems may still have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
