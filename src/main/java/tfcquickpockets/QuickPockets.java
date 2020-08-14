@@ -1,6 +1,25 @@
 // This code is in the public domain. You can do anything you want with it, and you don't even
 // have to give credits if you don't feel like it, although that would obviously be appreciated.
 
+/*
+CHANGES:
+- milking sound now only plays if you can actually milk the cow
+- fixed z-fighting on some chest variants
+- fixed player sounds being slightly off-center
+- fixed swap hotbar slot sounds not playing sometimes
+- fixed barrel soaking sound not always playing when intended
+---
+- made sure all sounds are mono
+- made chest closing sound louder
+- fixed cow milking sounds could sometimes play twice
+
+TODO:
+- fishing rod sounds
+- sounds when stacking ingots
+- bloomery sounds
+- WHY THE HELL does auto refill not always work???
+*/
+
 package tfcquickpockets;
 
 import cpw.mods.fml.common.Mod;
@@ -14,7 +33,7 @@ public class QuickPockets {
 
     public static final String ID = "tfcquickpockets";
     public static final String NAME = "TFC+ Quick Pockets";
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.1.1";
     public static final String DEPENDENCIES = "required-after:terrafirmacraftplus;";
     public static final String GUI_FACTORY = ID + ".Config";
     public static final String CLIENT_SIDE = ID + ".ClientStuff";

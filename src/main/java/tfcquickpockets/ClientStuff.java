@@ -28,6 +28,7 @@ import com.dunk.tfc.Items.ItemBlocks.ItemSapling;
 import com.dunk.tfc.Items.ItemCoal;
 import com.dunk.tfc.Items.Pottery.ItemPotterySmallVessel;
 import com.dunk.tfc.Items.Tools.*;
+import com.dunk.tfc.Render.TESR.TESRChest;
 import com.dunk.tfc.TerraFirmaCraft;
 import com.dunk.tfc.TileEntities.*;
 import com.dunk.tfc.api.Crafting.*;
@@ -108,7 +109,7 @@ public class ClientStuff extends ClientAndServerStuff {
     public static int HOTBAR_SIZE = InventoryPlayer.getHotbarSize();
     public static int INVENTORY_ROW_SIZE = 9;
     public static double BACKGROUND_FILTER_TRANSITION_SECONDS = 0.15;
-    public static int SOUND_WAIT_TICKS = 2;
+    public static int SOUND_TICKS_BEFORE_REPEAT = 2;
 
     public static ResourceLocation WIDGETS = new ResourceLocation("textures/gui/widgets.png");
     public static ResourceLocation BAG_OPEN = new ResourceLocation("tfcquickpockets", "bag.open");
@@ -167,6 +168,11 @@ public class ClientStuff extends ClientAndServerStuff {
     public static Random rng = new Random();
     public static Method syncCurrentPlayItem;
     public static Field remainingHighlightTicks;
+
+    // --- for chest textures ---
+
+    public static Field texNormal;
+    public static Field texNormalDouble;
 
     // --- for inventory GUIs ---
 
@@ -247,6 +253,8 @@ public class ClientStuff extends ClientAndServerStuff {
 
         //HACK: Such ugliness.. you just had to set stuff to private Dunk didn't you :P
         //MAINTENANCE: If any of these names change they need to be updated here as well.
+        texNormal = loadField(TESRChest.class, "texNormal");
+        texNormalDouble = loadField(TESRChest.class, "texNormalDouble");
         xSize = loadField(GuiContainer.class, "xSize");
         ySize = loadField(GuiContainer.class, "ySize");
         xSizeLow = loadField(GuiInventoryTFC.class, "xSizeLow");
@@ -272,6 +280,62 @@ public class ClientStuff extends ClientAndServerStuff {
         anvilZ = loadField(GuiAnvil.class, "z");
         sluiceTE = loadField(GuiSluice.class, "sluiceTE");
         horse = loadField(GuiScreenHorseInventoryTFC.class, "horse");
+
+        try {
+            ResourceLocation[] singleChestTextures = (ResourceLocation[])texNormal.get(null);
+            ResourceLocation[] doubleChestTextures = (ResourceLocation[])texNormalDouble.get(null);
+
+            for (int i = 0; i < singleChestTextures.length; ++i) {
+                String path = singleChestTextures[i].toString();
+                if (path.contains("terrafirmacraftplus")) {
+                    if (path.contains("Mahogany"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-mahogany-fixed.png");
+                    else if (path.contains("Gingko"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-gingko-fixed.png");
+                    else if (path.contains("Fruitwood"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-fruitwood-fixed.png");
+                    else if (path.contains("Fever"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-fever-fixed.png");
+                    else if (path.contains("Ebony"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-ebony-fixed.png");
+                    else if (path.contains("Palm"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-palm-fixed.png");
+                    else if (path.contains("Limba"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-limba-fixed.png");
+                    else if (path.contains("Mangrove"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-mangrove-fixed.png");
+                    else if (path.contains("Baobab"))
+                        singleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-single-baobab-fixed.png");
+                }
+            }
+
+            for (int i = 0; i < doubleChestTextures.length; ++i) {
+                String path = doubleChestTextures[i].toString();
+                if (path.contains("terrafirmacraftplus")) {
+                    if (path.contains("Mahogany"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-mahogany-fixed.png");
+                    else if (path.contains("Gingko"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-gingko-fixed.png");
+                    else if (path.contains("Fruitwood"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-fruitwood-fixed.png");
+                    else if (path.contains("Fever"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-fever-fixed.png");
+                    else if (path.contains("Ebony"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-ebony-fixed.png");
+                    else if (path.contains("Palm"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-palm-fixed.png");
+                    else if (path.contains("Limba"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-limba-fixed.png");
+                    else if (path.contains("Mangrove"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-mangrove-fixed.png");
+                    else if (path.contains("Baobab"))
+                        doubleChestTextures[i] = new ResourceLocation("tfcquickpockets", "chest-double-baobab-fixed.png");
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @SubscribeEvent @SuppressWarnings("unused")
@@ -761,7 +825,7 @@ public class ClientStuff extends ClientAndServerStuff {
     @SubscribeEvent @SuppressWarnings("unused")
     public void playBowNockSound(ArrowNockEvent event) {
         if (Config.enableBowWeaponSounds && bowNockSoundWaitTicks <= 0) {
-            bowNockSoundWaitTicks = SOUND_WAIT_TICKS;
+            bowNockSoundWaitTicks = SOUND_TICKS_BEFORE_REPEAT;
             System.out.println("\nArrow nock");
             bowNockSound = playSound(BOW_NOCK, minecraft.thePlayer, 1, 1);
         }
@@ -775,9 +839,10 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent @SuppressWarnings("unused")
     public void playCowMilkingSound(EntityInteractEvent event) {
+
         EntityPlayer player = event.entityPlayer;
         Entity target = event.target;
-        if (player != null && target != null) {
+        if (player != null && target != null && bucketSoundWaitTicks <= 0) {
 
             ItemStack currentStack = player.inventory.getCurrentItem();
             if (currentStack != null) {
@@ -790,6 +855,7 @@ public class ClientStuff extends ClientAndServerStuff {
                         EntityCowTFC cow = (EntityCowTFC)target;
 
                         canMilkEntity =
+                                cow.isMilkable() &&
                                 !(player.isSneaking() && !cow.getFamiliarizedToday() && cow.canFamiliarize()) &&
                                 cow.getGender() == IAnimal.GenderEnum.FEMALE &&
                                 cow.isAdult() &&
@@ -801,6 +867,7 @@ public class ClientStuff extends ClientAndServerStuff {
                     if (canMilkEntity) {
                         skipNextBucketSound = true;
                         playSound(COW_MILK, target, 1, 1);
+                        bucketSoundWaitTicks = SOUND_TICKS_BEFORE_REPEAT;
                     }
                 }
             }
@@ -867,11 +934,11 @@ public class ClientStuff extends ClientAndServerStuff {
                 ItemStack[] inventory = playerInventory.mainInventory;
                 ItemStack currentHeldStack = inventory[playerInventory.currentItem];
 
-                boolean hotbarSlotSwitched = lastSelectedItem != currentSelectedItem && lastSelectedItem > 0;
+                boolean hotbarSlotSwitched = lastSelectedItem != currentSelectedItem && lastSelectedItem >= 0;
 
                 if (hotbarSlotSwitched && switchHotbarSlotSoundWaitTicks <= 0 && Config.enableSwitchHotbarSlotSound) {
 
-                    switchHotbarSlotSoundWaitTicks = SOUND_WAIT_TICKS;
+                    switchHotbarSlotSoundWaitTicks = SOUND_TICKS_BEFORE_REPEAT;
                     playSound(BAG_OPEN, minecraft.thePlayer, 0.5f, 1.2f);
 
                 } else if (lastSelectedItem == currentSelectedItem) {
@@ -999,7 +1066,7 @@ public class ClientStuff extends ClientAndServerStuff {
                                         }
 
                                         if (bucketSound != null) {
-                                            bucketSoundWaitTicks = SOUND_WAIT_TICKS;
+                                            bucketSoundWaitTicks = SOUND_TICKS_BEFORE_REPEAT;
                                             if (skipNextBucketSound)
                                                 skipNextBucketSound = false;
                                             else
@@ -1512,9 +1579,9 @@ public class ClientStuff extends ClientAndServerStuff {
     }
 
     public static ISound playSound(ResourceLocation sound, Entity source, float loudness, float pitch) {
-        float x = (float)source.posX + 0.5f;
-        float y = (float)source.posY + 0.5f;
-        float z = (float)source.posZ + 0.5f;
+        float x = (float)source.posX;
+        float y = (float)source.posY - source.yOffset;
+        float z = (float)source.posZ;
         return playSound(sound, x, y, z, loudness, pitch);
     }
 
@@ -1687,7 +1754,7 @@ public class ClientStuff extends ClientAndServerStuff {
         BLOCK,
         OTHER;
 
-        public static int CONSUMABLE_FLAG = 1 << 0;
+        public static int CONSUMABLE_FLAG = 1;
         public static int TOOL_FLAG       = 1 << 1;
         public static int WEAPON_FLAG     = 1 << 2;
         public static int BLOCK_FLAG      = 1 << 3;
@@ -2101,7 +2168,7 @@ public class ClientStuff extends ClientAndServerStuff {
         public void onGuiClosed() {
             //TODO: Sometimes the chest open sound plays when you close the chest. No idea why...
             if (Config.enableChestClosingSound)
-                playSound(CHEST_CLOSE, minecraft.thePlayer, 0.7f, 1);
+                playSound(CHEST_CLOSE, minecraft.thePlayer, 0.9f, 1);
             super.onGuiClosed();
         }
     }
@@ -2473,11 +2540,16 @@ public class ClientStuff extends ClientAndServerStuff {
                 if (Config.enableBarrelItemSoakSound && guiTab == 0 && slot != null && slotIndex >= 0 && barrelTE.fluid != null) {
 
                     float viscosity = getFluidViscosity(barrelTE.fluid);
-                    ItemStack liquidStack = inventorySlots.getSlot(0).getStack();
+                    Slot soakedSlot = inventorySlots.getSlot(0);
+                    ItemStack soakedStack = soakedSlot.getStack();
                     ItemStack slotStack = slot.getStack();
                     ItemStack playerStack = player.inventory.getItemStack();
 
-                    if ((slotIndex == 0 && playerStack != null) || (liquidStack == null && slotStack != null && shiftDown != 0)) {
+                    boolean placingStackIntoBarrel = slotIndex == 0 && playerStack != null;
+                    boolean shiftClickingStackIntoBarrel = slotIndex != 0 && soakedStack == null && slotStack != null && shiftDown != 0 && soakedSlot.isItemValid(slotStack);
+                    boolean stackingWithSoakedStack = slotIndex != 0 && soakedStack != null && slotStack != null && shiftDown != 0 && soakedStack.isStackable() && soakedStack.isItemEqual(slotStack);
+
+                    if (placingStackIntoBarrel || shiftClickingStackIntoBarrel || stackingWithSoakedStack) {
                         playFluidSound(FLUID_SOAK, FLUID_SOAK_VISCOUS, barrelTE, viscosity, 1, 1);
                     } else if (slotIndex == 0 && slotStack != null) {
                         playFluidSound(FLUID_UNSOAK, FLUID_UNSOAK_VISCOUS, barrelTE, viscosity, 1, 1);
