@@ -49,7 +49,7 @@ Note that it wouldn't make much sense to allow the player to move around while i
 
 Minecraft 1.7.10 is oddly quiet, especially compared to the newer versions. There are no bucket sounds, no weapon sounds, not even a chest closing sound. This addon adds these newer sounds back in, along with additional TFC+ specific sounds. 
 
-For a full list of added sounds, as well as the volume sliders that control them, expand the list below.
+For a full list of added sounds, as well as the volume sliders that control them, expand the list below. Most of these sounds can be toggled on or off on an individual basis from the config menu.
 
 <details>
   <summary>Click to expand.</summary>
