@@ -100,9 +100,9 @@ _I do not take credit for making the sounds themselves. The credits for each sou
 
 This mod adds a very hacky fix for this problem. It detects when a waterskin "hops" inventory slots and places it in the correct slot on the next game tick, saving you the trouble of doing it manually.
 
-### Inventory Screen Fixes
+### Inventory Fixes
 
-Apart from the core features, this mod also fixes a few small visual inconsistencies in inventory screens. Things that you probably won't notice for a while but that you can't stop noticing if you've seen them.
+Apart from the core features, this mod also fixes a few small visual inconsistencies. Things that you probably won't notice for a while but that you can't stop noticing if you've seen them.
 
 The player model in the inventory screen is supposed to be looking directly at your cursor - but they don't! They look slightly off to the side. This was fixed.
 
@@ -121,6 +121,8 @@ The basket and large vessel inventory screens hava a small inconsistency on thei
     <img width="796" height="172" src="screenshots/gui-fixes.png">
   </p>
 </details>
+
+The textures of 9 chest variants were slighly incorrect leading to these chests noticeably flickering due to z-fighting. Baobab, ebony, fever, fruitwood, gingko, limba, mahogany, mangrove, and palm chest had this problem. This mod fixes this problem.
 
 ### No Useless Drops
 
