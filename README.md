@@ -103,21 +103,15 @@ Apart from the core features, this mod also fixes a few small visual inconsisten
 
 The player model in the inventory screen is supposed to be looking directly at your cursor - but they don't! They look slightly off to the side. This was fixed.
 
-<details>
-  <summary>Click to expand.</summary>
   <p align="center">
     <img width="796" height="274" src="screenshots/player-stare.png">
   </p>
-</details>
 
 The basket and large vessel inventory screens hava a small inconsistency on their left-most inventory slots. This has also been fixed.
 
-<details>
-  <summary>Click to expand.</summary>
   <p align="center">
     <img width="796" height="172" src="screenshots/gui-fixes.png">
   </p>
-</details>
 
 The textures of 9 chest variants were slighly incorrect leading to these chests noticeably flickering due to z-fighting. Baobab, ebony, fever, fruitwood, gingko, limba, mahogany, mangrove, and palm chest had this problem. This mod fixes this problem.
 
@@ -134,9 +128,12 @@ The textures of 9 chest variants were slighly incorrect leading to these chests 
 
 All of the above features are fully customizable. You can completely choose whatever combination of features works best for you. There configuration categories for each of the above features in the mod's `Config` menu. For features that require pressing keys, these keys can be bound through the key bindings menu, under the `Inventory` category.
 
-<p align="center">
-  <img src="screenshots/config.png">
-</p>
+<details>
+  <summary>Click to expand.</summary>
+  <p align="center">
+    <img src="screenshots/config.png">
+  </p>
+</details>
 
 ## Requirements
 
