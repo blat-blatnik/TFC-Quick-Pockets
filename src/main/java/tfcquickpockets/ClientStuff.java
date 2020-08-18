@@ -79,6 +79,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.*;
 import net.minecraft.item.ItemShears;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
@@ -113,9 +114,13 @@ public class ClientStuff extends ClientAndServerStuff {
 
     public static ResourceLocation WIDGETS = new ResourceLocation("textures/gui/widgets.png");
     public static ResourceLocation BAG_OPEN = new ResourceLocation("tfcquickpockets", "bag.open");
+    public static ResourceLocation FISHING_CAST = new ResourceLocation("tfcquickpockets", "fishing.cast");
+    public static ResourceLocation FISHING_REEL = new ResourceLocation("tfcquickpockets", "fishing.reel");
+    public static ResourceLocation FISHING_RETRIEVE = new ResourceLocation("tfcquickpockets", "fishing.retrieve");
     public static ResourceLocation LEASH_PLACE = new ResourceLocation("tfcquickpockets", "leash.place");
     public static ResourceLocation LEASH_BREAK = new ResourceLocation("tfcquickpockets", "leash.break");
     public static ResourceLocation FIRE_CRACKLE = new ResourceLocation("tfcquickpockets", "fire.crackle");
+    public static ResourceLocation FIRE = new ResourceLocation("fire.fire");
     public static ResourceLocation ATTACK_SWORD = new ResourceLocation("tfcquickpockets", "attack.sword");
     public static ResourceLocation ATTACK_MACE = new ResourceLocation("tfcquickpockets", "attack.mace");
     public static ResourceLocation ATTACK_AXE = new ResourceLocation("tfcquickpockets", "attack.axe");
@@ -525,7 +530,7 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent(priority=EventPriority.HIGH) @SuppressWarnings("unused")
     public void drawInventoryPreviewAndStopTFCFromDrawingGUI(RenderGameOverlayEvent.Pre event) {
-        if (cycleHotbar.getIsKeyPressed()) {
+        if (Config.enableHotbarCyclePreview && cycleHotbar.getIsKeyPressed()) {
             int width = event.resolution.getScaledWidth();
             int height = event.resolution.getScaledHeight();
             switch (event.type) {
@@ -554,7 +559,7 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent @SuppressWarnings("unused")
     public void drawChatOverlayAboveInventoryPreview(RenderGameOverlayEvent.Chat event) {
-        if (cycleHotbar.getIsKeyPressed()) {
+        if (Config.enableHotbarCyclePreview && cycleHotbar.getIsKeyPressed()) {
             event.posY -= 32;
         }
     }
@@ -666,6 +671,29 @@ public class ClientStuff extends ClientAndServerStuff {
         }
     }
 
+    //@SubscribeEvent @SuppressWarnings("unused")
+    //public void playFishingRodSounds(PlayerUseItemEvent.Tick event) {
+    //    if (Config.enableFishingRodSounds && event.entityPlayer != null && event.item != null && event.item.getItem() instanceof ItemCustomFishingRod) {
+    //        ItemStack fishingRod = event.item;
+    //        NBTTagCompound tag = fishingRod.getTagCompound();
+    //        System.out.printf("using fishing rod: %s", event.item);
+    //        if (tag != null) {
+    //            boolean fishing = tag.hasKey("fishing") && tag.getBoolean("fishing");
+    //            boolean lineSet = tag.hasKey("lineSet") && tag.getBoolean("lineSet");
+    //            if (fishing && lineSet) {
+    //                playSound(FISHING_REEL, event.entityPlayer, 1, 1);
+    //            }
+    //            if (tag.hasKey("lineSet"))
+    //                System.out.printf(", lineSet: %b", tag.getBoolean("lineSet"));
+    //            if (tag.hasKey("tickReeledIn"))
+    //                System.out.printf(", tickReeledIn: %d", tag.getLong("tickReeledIn"));
+    //            if (tag.hasKey("fishing"))
+    //                System.out.printf(", fishing: %b", tag.getBoolean("fishing"));
+    //        }
+    //        System.out.printf("\n");
+    //    }
+    //}
+
     @SubscribeEvent @SuppressWarnings("unused")
     public void doAutoRefillAndFixWaterskin(TickEvent.ClientTickEvent event) {
         if (minecraft.thePlayer != null) {
@@ -750,7 +778,14 @@ public class ClientStuff extends ClientAndServerStuff {
                     leashedEntities = leashedEntitiesSwap;
                 }
 
-                if (Config.enableFirepitSounds && minecraft != null && minecraft.theWorld != null && minecraft.thePlayer != null && !minecraft.isGamePaused()) {
+                boolean canPlayFireSounds =
+                        minecraft != null &&
+                        minecraft.theWorld != null &&
+                        minecraft.thePlayer != null &&
+                        !minecraft.isGamePaused() &&
+                        (Config.enableFirepitSounds || Config.enableBloomerySounds || Config.enableBlastFurnaceSounds);
+
+                if (canPlayFireSounds) {
                     @SuppressWarnings("unchecked")
                     List<TileEntity> loadedTileEntities = minecraft.theWorld.loadedTileEntityList;
                     for (TileEntity entity : loadedTileEntities) {
@@ -760,23 +795,38 @@ public class ClientStuff extends ClientAndServerStuff {
                         int z = entity.zCoord;
                         double distanceToPlayer = minecraft.thePlayer.getDistanceSq(x + 0.5f, y + 0.5f, z + 0.5f);
 
-                        if (distanceToPlayer < 16*16 && entity instanceof TEFirepit) {
-                            TEFirepit fire = (TEFirepit)minecraft.theWorld.getTileEntity(x, y, z);
-                            if (fire != null) {
+                        if (distanceToPlayer < 16*16) {
+                            if (Config.enableFirepitSounds && rng.nextFloat() > 0.95 && entity instanceof TEFirepit) {
+                                TEFirepit fire = (TEFirepit)minecraft.theWorld.getTileEntity(x, y, z);
+                                if (fire != null) {
 
-                                float whatever = fire.getTemperatureScaled(49);
-
-                                int meta = minecraft.theWorld.getBlockMetadata(x, y, z);
-                                if (meta > 0) { //MAINTENANCE: meta > 0 means the firepit is lit right now.
-                                    if (rng.nextFloat() > 0.95) {
-
+                                    int meta = fire.getBlockMetadata();
+                                    if (meta > 0) { //ASSUMPTION: meta > 0 means the firepit is lit right now.
                                         float tempFactor = fire.fireTemp / 700.0f;
                                         float loudness = 0.05f + tempFactor;
                                         float pitch = 1.2f - 0.4f * tempFactor;
 
-                                        System.out.printf("Crackle meta: %d, fireTemp: %.1f, loudness: %.2f, pitch: %.2f\n", meta, fire.fireTemp, loudness, pitch);
+                                        //System.out.printf("Crackle meta: %d, fireTemp: %.1f, loudness: %.2f, pitch: %.2f\n", meta, fire.fireTemp, loudness, pitch);
                                         playSound(FIRE_CRACKLE, fire, loudness, pitch);
                                     }
+                                }
+                            } else if (Config.enableBloomerySounds && rng.nextFloat() > 0.95 && entity instanceof TEBloomery) {
+                                TEBloomery bloomery = (TEBloomery)entity;
+                                int meta = bloomery.getBlockMetadata();
+                                if (bloomery.bloomeryLit || (meta & 4) != 0) { //ASSUMPTION: meta & 0b100 means the bloomery is lit
+                                    float loudness = 0.4f + rng.nextFloat() / 2;
+                                    float pitch = 0.4f + rng.nextFloat() / 2;
+                                    playSound(FIRE, bloomery, loudness, pitch);
+                                }
+                            } else if (Config.enableBlastFurnaceSounds && rng.nextFloat() > 0.95 && entity instanceof TEBlastFurnace) {
+                                TEBlastFurnace furnace = (TEBlastFurnace)entity;
+                                int meta = furnace.getBlockMetadata();
+                                //float temp = furnace.fireTemp; TODO: Why doesn't this work unless inventory is open???
+                                //System.out.printf("Furnace meta: %d, temp: %.1f\n", meta, temp);
+                                if ((meta & 4) != 0) { //ASSUMPTION: meta & 0b100 means the bloomery is lit
+                                    float loudness = 0.4f + rng.nextFloat() / 2;
+                                    float pitch = 0.4f + rng.nextFloat();
+                                    playSound(FIRE, furnace, loudness, pitch);
                                 }
                             }
                         }
@@ -826,8 +876,17 @@ public class ClientStuff extends ClientAndServerStuff {
     public void playBowNockSound(ArrowNockEvent event) {
         if (Config.enableBowWeaponSounds && bowNockSoundWaitTicks <= 0) {
             bowNockSoundWaitTicks = SOUND_TICKS_BEFORE_REPEAT;
-            System.out.println("\nArrow nock");
-            bowNockSound = playSound(BOW_NOCK, minecraft.thePlayer, 1, 1);
+            //System.out.println("\nArrow nock");
+            EntityPlayer player = event.entityPlayer;
+
+            ItemStack[] inventory = player.inventory.mainInventory;
+            for (int i = 0; i < HOTBAR_SIZE; ++i) {
+                ItemStack stack = inventory[i];
+                if (stack != null && stack.getItem() instanceof ItemArrow && stack.stackSize > 0) {
+                    bowNockSound = playSound(BOW_NOCK, player, 1, 1);
+                    break;
+                }
+            }
         }
     }
 
@@ -925,7 +984,6 @@ public class ClientStuff extends ClientAndServerStuff {
 
     public static void checkIfNeedToDoAutoFill() {
         if (minecraft.thePlayer != null) {
-
             InventoryPlayer playerInventory = minecraft.thePlayer.inventory;
 
             if (playerInventory != null) {

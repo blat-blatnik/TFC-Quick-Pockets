@@ -45,6 +45,7 @@ public class Config implements IModGuiFactory {
     public static boolean onlyMoveWhenSprintKeyIsPressed = true;
 
     public static String HOTBAR_CYCLING_CATEGORY = "hotbar-cycling";
+    public static boolean enableHotbarCyclePreview = true;
     public static boolean invertHotbarCycleDirection = false;
     public static float hotbarCyclePreviewTransparency = 0.6f;
     public static float hotbarCyclePreviewItemIconScale = 0.5f;
@@ -77,6 +78,9 @@ public class Config implements IModGuiFactory {
     public static boolean enableBowWeaponSounds = true;
     public static boolean enableBucketSounds = true;
     public static boolean enableFirepitSounds = true;
+    public static boolean enableBloomerySounds = true;
+    public static boolean enableBlastFurnaceSounds = true;
+    public static boolean enableFishingRodSounds = true;
     public static boolean enableRopeSounds = true;
 
     public static String WATERSKIN_FIX_CATEGORY = "waterskin-fix";
@@ -128,6 +132,8 @@ public class Config implements IModGuiFactory {
         onlyMoveWhenSprintKeyIsPressed = config.getBoolean("Only Move If Sprint Is Pressed", WALK_IN_INVENTORY_CATEGORY, true,
                 "\nWhether the sprint key needs to be pressed in order to move in the inventory screen.\n\nNote that if you disable this you will also move whenever you cut decay off or stack food with D/S.\n\n");
 
+        enableHotbarCyclePreview = config.getBoolean("Enable Hotbar Cycle Preview", HOTBAR_CYCLING_CATEGORY, true,
+                "\nWhether to show a preview of the next and previous inventory slots when cycling through the hotbar.\n\n");
         invertHotbarCycleDirection = config.getBoolean("Invert Scrolling Direction", HOTBAR_CYCLING_CATEGORY, false,
                 "\nIf set to true, scrolling the mouse wheel up will move you *down* one inventory row, otherwise scrolling up will move you *up*.\n\n");
         hotbarCyclePreviewTransparency = config.getFloat("Hotbar Preview Transparency", HOTBAR_CYCLING_CATEGORY, 0.6f, 0.0f, 1.0f,
@@ -186,6 +192,12 @@ public class Config implements IModGuiFactory {
                 "\nWhether to play sounds when filling or emptying buckets.\n\n");
         enableFirepitSounds = config.getBoolean("Enable Firepit Sounds", SOUNDS_CATEGORY, true,
                 "\nWhether to play sounds when near a burning firepit.\n\n");
+        enableBloomerySounds = config.getBoolean("Enable Bloomery Sounds", SOUNDS_CATEGORY, true,
+                "\nWhether to play sounds when near a lit bloomery.\n\n");
+        enableBlastFurnaceSounds = config.getBoolean("Enable Blast Furnace Sounds", SOUNDS_CATEGORY, true,
+                "\nWhether to play sounds when near a lit blast furnace.\n\n");
+        //enableFishingRodSounds = config.getBoolean("Enable Fishing Rod Sounds", SOUNDS_CATEGORY, true,
+        //        "\nWhether to play sounds when casting and reeling in with a fishing rod.\n\n");
         enableRopeSounds = config.getBoolean("Enable Rope Sounds", SOUNDS_CATEGORY, true,
                 "\nWhether to play sounds when tying a rope to a fence, attach it to an animal, or when the rope snaps.\n\n");
 
@@ -213,6 +225,7 @@ public class Config implements IModGuiFactory {
             waterskinFixDelayTicks = 0;
             disableSpiderEyes = false;
             disableRottenFlesh = false;
+            enableHotbarCyclePreview = false;
         }
 
         if (config.hasChanged())
@@ -307,7 +320,7 @@ public class Config implements IModGuiFactory {
                 return element.enabled();
         }
 
-        @Override
+        @Override @SuppressWarnings("unchecked")
         protected GuiScreen buildChildScreen() {
             return new CustomCategoryGUI(owningScreen, configElement.getChildElements(), owningScreen.modID, owningScreen.configID,
                     owningScreen.allRequireWorldRestart || this.configElement.requiresWorldRestart(),
