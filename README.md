@@ -183,6 +183,7 @@ All features of this addon that move items around in the inventory require serve
 
 |version|TFC+ versions|changes|
 |:-----:|:-----------:|:------|
+|[1.1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.2)|0.84.1 -- 0.85.3|• added bloomery and blast furnace sounds<br>• fixed bug with bow sounds|
 |[1.1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.1)|0.84.1 -- 0.85.3|• fixed some chests had textures that caused them to flicker<br>• various bug fixes|
 |[1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1)|0.84.1 -- 0.85.3|• added additional sounds<br>• food is now automatically stacked when picked up<br>• improved how auto-refill looks for replacement items<br>• added client-side only mode for playing on servers<br>• "remove dark filter in inventory" is now turned off by default|
 |[1.0](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0)|0.84.1 -- 0.85.2|• fixed inconsistencies with large vessel and basket GUI|
