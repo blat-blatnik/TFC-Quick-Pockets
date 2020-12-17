@@ -2,10 +2,7 @@
 // have to give credits if you don't feel like it, although that would obviously be appreciated.
 
 // CHANGES
-// - added Sounds
-// - improved auto-refill. it will no longer try to replace vessels with leather bags for example.
-// - "remove dark filter in inventory" is now turned off by default.
-// - picking up food will now automatically stack it in your inventory
+// - Fixed potential bug with some mods rebinding the keys to weird values.
 
 package tfcquickpockets;
 
@@ -718,12 +715,12 @@ public class ClientStuff extends ClientAndServerStuff {
                     int right = settings.keyBindRight.getKeyCode();
 
                     int sprint = settings.keyBindSprint.getKeyCode();
-                    boolean sprintIsDown = Keyboard.isKeyDown(sprint);
+                    boolean sprintIsDown = isKeyDown(sprint);
 
-                    KeyBinding.setKeyBindState(forward, sprintIsDown && Keyboard.isKeyDown(forward));
-                    KeyBinding.setKeyBindState(back, sprintIsDown && Keyboard.isKeyDown(back));
-                    KeyBinding.setKeyBindState(left, sprintIsDown && Keyboard.isKeyDown(left));
-                    KeyBinding.setKeyBindState(right, sprintIsDown && Keyboard.isKeyDown(right));
+                    KeyBinding.setKeyBindState(forward, sprintIsDown && isKeyDown(forward));
+                    KeyBinding.setKeyBindState(back, sprintIsDown && isKeyDown(back));
+                    KeyBinding.setKeyBindState(left, sprintIsDown && isKeyDown(left));
+                    KeyBinding.setKeyBindState(right, sprintIsDown && isKeyDown(right));
 
                     KeyBinding.onTick(forward);
                     KeyBinding.onTick(back);
@@ -732,7 +729,7 @@ public class ClientStuff extends ClientAndServerStuff {
 
                     if (Config.allowJumpingInInventory) {
                         int jump = settings.keyBindJump.getKeyCode();
-                        KeyBinding.setKeyBindState(jump, Keyboard.isKeyDown(jump));
+                        KeyBinding.setKeyBindState(jump, isKeyDown(jump));
                         KeyBinding.onTick(jump);
                     }
                 }
@@ -1775,6 +1772,22 @@ public class ClientStuff extends ClientAndServerStuff {
         }
     }
 
+    public static boolean isKeyDown(int keycode) {
+        // This looks a bit complicated because it's supposed to be able to handle both mouse buttons and keyboard keys.
+        // Mouse button key codes from minecraft KeyBindings are always encoded as mouse button number - 100, so left
+        // mouse button would be 0-100 = -100, right mouse button would be 1-100 = -99, etc.
+
+        try {
+            return Keyboard.isKeyDown(keycode);
+        } catch (Exception notAKeyboardKey) {
+            try {
+                return Mouse.isButtonDown(100 + keycode);
+            } catch (Exception notAMouseButtonEither) {
+                return false;
+            }
+        }
+    }
+
     public enum ItemCategory {
         NONE,
         SWORD,
@@ -2045,7 +2058,7 @@ public class ClientStuff extends ClientAndServerStuff {
 
         public InventoryGUIWithFastBagAccess(EntityPlayer player) {
             super(player);
-            backgroundFilterAlpha = Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()) ? 0 : 1;
+            backgroundFilterAlpha = isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()) ? 0 : 1;
             lastTimeNanosecs = System.nanoTime();
 
             if (Config.enablePlayerInventorySound)
@@ -2069,7 +2082,7 @@ public class ClientStuff extends ClientAndServerStuff {
                 double dt = (nanosecs - lastTimeNanosecs) / 1e9;
                 lastTimeNanosecs = nanosecs;
 
-                if (Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()))
+                if (isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()))
                     backgroundFilterAlpha -= dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
                 else
                     backgroundFilterAlpha += dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
@@ -2132,7 +2145,7 @@ public class ClientStuff extends ClientAndServerStuff {
         public ContainerGUIWithFastBagAccess(Container container, int xSize, int ySize, ResourceLocation texture) {
             super(container, xSize, ySize);
             this.texture = texture;
-            backgroundFilterAlpha = Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()) ? 0 : 1;
+            backgroundFilterAlpha = isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()) ? 0 : 1;
             lastTimeNanosecs = System.nanoTime();
         }
 
@@ -2153,7 +2166,7 @@ public class ClientStuff extends ClientAndServerStuff {
                 double dt = (nanosecs - lastTimeNanosecs) / 1e9;
                 lastTimeNanosecs = nanosecs;
 
-                if (Keyboard.isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()))
+                if (isKeyDown(minecraft.gameSettings.keyBindSprint.getKeyCode()))
                     backgroundFilterAlpha -= dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
                 else
                     backgroundFilterAlpha += dt / BACKGROUND_FILTER_TRANSITION_SECONDS;
