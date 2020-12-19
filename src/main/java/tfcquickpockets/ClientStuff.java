@@ -15,6 +15,7 @@ import com.dunk.tfc.Core.TFC_Time;
 import com.dunk.tfc.Entities.Mobs.EntityCowTFC;
 import com.dunk.tfc.Entities.Mobs.EntityHorseTFC;
 import com.dunk.tfc.Food.ItemFoodTFC;
+import com.dunk.tfc.Food.ItemMeal;
 import com.dunk.tfc.GUI.*;
 import com.dunk.tfc.GUI.GuiHopper;
 import com.dunk.tfc.Handlers.Client.RenderOverlayHandler;
@@ -23,6 +24,7 @@ import com.dunk.tfc.Items.*;
 import com.dunk.tfc.Items.ItemBlocks.ItemFlowers;
 import com.dunk.tfc.Items.ItemBlocks.ItemSapling;
 import com.dunk.tfc.Items.ItemCoal;
+import com.dunk.tfc.Items.Pottery.ItemPotteryJug;
 import com.dunk.tfc.Items.Pottery.ItemPotterySmallVessel;
 import com.dunk.tfc.Items.Tools.*;
 import com.dunk.tfc.Render.TESR.TESRChest;
@@ -842,7 +844,7 @@ public class ClientStuff extends ClientAndServerStuff {
                 ItemStack weapon = player.inventory.getCurrentItem();
                 ItemCategory category = ItemCategory.OTHER;
                 if (weapon != null)
-                    category = ItemCategory.get(weapon.getItem());
+                    category = ItemCategory.get(weapon);
 
                 switch (category) {
                     case SWORD:
@@ -1132,7 +1134,7 @@ public class ClientStuff extends ClientAndServerStuff {
                             }
 
                             if (!Config.clientOnlyMode) {
-                                ItemCategory category = ItemCategory.get(lastHeldStack.getItem());
+                                ItemCategory category = ItemCategory.get(lastHeldStack);
                                 int broadCategory = category.getBroadCategoryFlags();
 
                                 boolean doRefill = false;
@@ -1227,8 +1229,8 @@ public class ClientStuff extends ClientAndServerStuff {
         else {
             Item item1 = a.getItem();
             Item item2 = b.getItem();
-            ItemCategory category1 = ItemCategory.get(item1);
-            ItemCategory category2 = ItemCategory.get(item2);
+            ItemCategory category1 = ItemCategory.get(a);
+            ItemCategory category2 = ItemCategory.get(b);
 
             int similarity = 0;
             if (item1 == item2 && item1.getUnlocalizedName(a).equals(item2.getUnlocalizedName(b)))
@@ -1831,7 +1833,8 @@ public class ClientStuff extends ClientAndServerStuff {
         public static int BLOCK_FLAG      = 1 << 3;
         public static int MISC_FLAG       = 1 << 4;
 
-        public static ItemCategory get(Item item) {
+        public static ItemCategory get(ItemStack stack) {
+            Item item = stack.getItem();
             if (item == null)
                 return ItemCategory.NONE;
             else if (item instanceof ItemCustomSword) {
@@ -1843,9 +1846,9 @@ public class ClientStuff extends ClientAndServerStuff {
                 return ItemCategory.BOW;
             } else if (item instanceof ItemJavelin) {
                 return ItemCategory.JAVELIN;
-            } else if (item instanceof ItemFoodTFC || item instanceof ItemHoneyBowl) {
+            } else if (item instanceof ItemFoodTFC || item instanceof ItemHoneyBowl || item instanceof ItemMeal) {
                 return ItemCategory.FOOD;
-            } else if (item instanceof ItemDrink) {
+            } else if (item instanceof ItemDrink || (item instanceof ItemPotteryJug && stack.getItemDamage() == 2)) {
                 return ItemCategory.DRINK;
             } else if (item instanceof ItemPickaxe) {
                 return ItemCategory.PICKAXE;
@@ -2033,7 +2036,7 @@ public class ClientStuff extends ClientAndServerStuff {
         public boolean slotMatches(ItemStack slot) {
             if (slot != null) {
                 Item item = slot.getItem();
-                ItemCategory slotCategory = ItemCategory.get(item);
+                ItemCategory slotCategory = ItemCategory.get(slot);
                 for (ItemCategory matchCategory : categories) {
                     if (matchCategory.matches(slotCategory)) {
                         if (filter == null || filter.test(item)) {
