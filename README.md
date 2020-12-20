@@ -180,6 +180,7 @@ All features of this addon that move items around in the inventory require serve
 
 |version|TFC+ versions|changes|
 |:-----:|:-----------:|:------|
+|[1.1.4](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.4)|0.84.1 -- 0.85.6|• fixed salads and sandwiches not being considered food and water jugs not being considered drinks for quick-swapping and auto-refill|
 |[1.1.3](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.3)|0.84.1 -- 0.85.6|• fixed crash when certain keys were bound to mouse buttons|
 |[1.1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.2)|0.84.1 -- 0.85.3|• added bloomery and blast furnace sounds<br>• fixed bug with bow sounds|
 |[1.1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.1)|0.84.1 -- 0.85.3|• fixed some chests had textures that caused them to flicker<br>• various bug fixes|
