@@ -180,17 +180,17 @@ All features of this addon that move items around in the inventory require serve
 
 |version|TFC+ versions|changes|
 |:-----:|:-----------:|:------|
-|[1.1.4](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.4)|0.84.1 -- 0.85.6|• fixed salads and sandwiches not being considered food and water jugs not being considered drinks for quick-swapping and auto-refill|
-|[1.1.3](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.3)|0.84.1 -- 0.85.6|• fixed crash when certain keys were bound to mouse buttons|
-|[1.1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.2)|0.84.1 -- 0.85.3|• added bloomery and blast furnace sounds<br>• fixed bug with bow sounds|
-|[1.1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.1)|0.84.1 -- 0.85.3|• fixed some chests had textures that caused them to flicker<br>• various bug fixes|
-|[1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1)|0.84.1 -- 0.85.3|• added additional sounds<br>• food is now automatically stacked when picked up<br>• improved how auto-refill looks for replacement items<br>• added client-side only mode for playing on servers<br>• "remove dark filter in inventory" is now turned off by default|
-|[1.0](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0)|0.84.1 -- 0.85.2|• fixed inconsistencies with large vessel and basket GUI|
-|[beta 1.2.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2.2-beta)|0.84.1 -- 0.85.2|• improved how auto-refill looks for replacement items<br>• added config option to enable walk in inventory without the <kbd>SPRINT</kbd> key|
-|[beta 1.2.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2.1-beta)|0.84.1 -- 0.85.2|• you now have to hold <kbd>SPRINT</kbd> to walk in the inventory|
-|[beta 1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2-beta)|0.84.1 -- 0.85.1|• can now walk in inventory screens<br>• organized config into neat categories|
-|[beta 1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1-beta)|0.84.1 -- 0.85.1|• tool cycling now correctly cycles through all tools<br>• zombies and spiders no longer drop rotten flesh and spider eyes<br>• added auto-refill|
-|[beta 1.0.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0.1-beta)|0.84.1 -- 0.85.1|• fixed item duplication and other item temperature related weirdness<br>• added config options to disable quick container access on certain items<br>• most features now require server assistance to work|
-|[beta 1.0](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0-beta)|0.84.1 -- 0.85.1|initial release|
+|[1.1.4](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.4)|0.84.1 - 0.85.6|• fixed salads and sandwiches not being considered food and water jugs not being considered drinks|
+|[1.1.3](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.3)|0.84.1 - 0.85.6|• fixed crash when certain keys were bound to mouse buttons|
+|[1.1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.2)|0.84.1 - 0.85.3|• added bloomery and blast furnace sounds<br>• fixed bug with bow sounds|
+|[1.1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.1)|0.84.1 - 0.85.3|• fixed some chests had textures that caused them to flicker<br>• various bug fixes|
+|[1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1)|0.84.1 - 0.85.3|• added additional sounds<br>• food is now automatically stacked when picked up<br>• improved how auto-refill looks for replacement items<br>• added client-side only mode for playing on servers<br>• "remove dark filter in inventory" is now turned off by default|
+|[1.0](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0)|0.84.1 - 0.85.2|• fixed inconsistencies with large vessel and basket GUI|
+|[beta 1.2.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2.2-beta)|0.84.1 - 0.85.2|• improved how auto-refill looks for replacement items<br>• added config option to enable walk in inventory without the <kbd>SPRINT</kbd> key|
+|[beta 1.2.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2.1-beta)|0.84.1 - 0.85.2|• you now have to hold <kbd>SPRINT</kbd> to walk in the inventory|
+|[beta 1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.2-beta)|0.84.1 - 0.85.1|• can now walk in inventory screens<br>• organized config into neat categories|
+|[beta 1.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1-beta)|0.84.1 - 0.85.1|• tool cycling now correctly cycles through all tools<br>• zombies and spiders no longer drop rotten flesh and spider eyes<br>• added auto-refill|
+|[beta 1.0.1](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0.1-beta)|0.84.1 - 0.85.1|• fixed item duplication and other item temperature related weirdness<br>• added config options to disable quick container access on certain items<br>• most features now require server assistance to work|
+|[beta 1.0](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.0-beta)|0.84.1 - 0.85.1|initial release|
 
 </details>
