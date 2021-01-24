@@ -45,17 +45,39 @@ public class ClientAndServerStuff {
     public static boolean isFood(ItemStack stack) {
         if (stack != null && stack.getItem() != null) {
             Item item = stack.getItem();
-            return item instanceof ItemFoodTFC && stack.hasTagCompound() && stack.getTagCompound().hasKey("foodWeight");
+            return item instanceof ItemFoodTFC && stack.hasTagCompound() && stack.getTagCompound().hasKey(Food.WEIGHT_TAG);
         } else
             return false;
     }
 
-    public static boolean isSameFood(int[] taste1, int[] fuel1, int[] cooked1, int cookCategory1, int[] taste2, int[] fuel2, int[] cooked2, int cookCategory2) {
-        return
-                cookCategory1 == cookCategory2 &&
-                Food.isSameSmoked(taste1, taste2) &&
-                Food.isSameSmoked(fuel1, fuel2) &&
-                Food.isSameSmoked(cooked1, cooked2);
+    public static boolean isSameFood(ItemStack stack1, ItemStack stack2)
+    {
+        if (stack1.getItem() instanceof ItemFoodTFC && stack2.getItem() instanceof ItemFoodTFC) {
+
+            ItemFoodTFC food1 = (ItemFoodTFC)stack1.getItem();
+            ItemFoodTFC food2 = (ItemFoodTFC)stack2.getItem();
+
+            if (food1.foodID == food2.foodID) {
+
+                int[] taste1      = Food.getFoodTasteProfile(stack1);
+                int[] fuel1       = Food.getFuelProfile(stack1);
+                int[] cooked1     = Food.getCookedProfile(stack1);
+                int cookCategory1 = ((int)Food.getCooked(stack1) - 600) / 120;
+
+                int[] taste2      = Food.getFoodTasteProfile(stack2);
+                int[] fuel2       = Food.getFuelProfile(stack2);
+                int[] cooked2     = Food.getCookedProfile(stack2);
+                int cookCategory2 = ((int)Food.getCooked(stack2) - 600) / 120;
+
+                return
+                    cookCategory1 == cookCategory2 &&
+                    Food.isSameSmoked(taste1, taste2) &&
+                    Food.isSameSmoked(fuel1, fuel2) &&
+                    Food.isSameSmoked(cooked1, cooked2);
+            }
+        }
+
+        return false;
     }
 
     // adapted from com.dunk.tfc.Handlers.FoodCraftingHandler
@@ -67,10 +89,6 @@ public class ClientAndServerStuff {
                 ItemStack inputFoodStack = inventory.getSlot(inputFoodSlot).getStack();
                 if (isFood(inputFoodStack)) {
 
-                    int[] inputTaste = Food.getFoodTasteProfile(inputFoodStack);
-                    int[] inputFuelTaste = Food.getFuelProfile(inputFoodStack);
-                    int[] inputCookedTaste = Food.getCookedProfile(inputFoodStack);
-                    int inputCookCategory = ((int)Food.getCooked(inputFoodStack) - 600) / 120;
                     float inputWeight = Food.getWeight(inputFoodStack);
                     float inputDecay = Food.getDecay(inputFoodStack);
                     float inputDecayFraction = inputDecay / inputWeight;
@@ -88,14 +106,11 @@ public class ClientAndServerStuff {
                             ItemStack foodStack = inventory.getSlot(foodSlot).getStack();
                             if (isFood(foodStack)) {
 
-                                int[] taste = Food.getFoodTasteProfile(foodStack);
-                                int[] fuelTaste = Food.getFuelProfile(foodStack);
-                                int[] cookedTaste = Food.getCookedProfile(foodStack);
-                                int cookCategory = ((int)Food.getCooked(foodStack) - 600) / 120;
                                 float weight = Food.getWeight(foodStack);
                                 float decay = Food.getDecay(foodStack);
 
-                                if (weight < 160 && isSameFood(taste, fuelTaste, cookedTaste, cookCategory, inputTaste, inputFuelTaste, inputCookedTaste, inputCookCategory)) {
+                                if (weight < 160 && isSameFood(inputFoodStack, foodStack)) {
+
                                     float newWeight = Math.min(weight + inputWeight, 160);
                                     float weightChange = newWeight - weight;
                                     float inputWeightChangeFraction = weightChange / inputWeight;
