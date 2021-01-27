@@ -167,7 +167,7 @@ After it has finished, the mod you built should be in the `./build/libs/` direct
 
 Download the latest version [here](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases). 
 
-Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.85.3. 
+Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.86.2. 
 
 All features of this addon that move items around in the inventory require server support to function. If you want to play with this addon on a server that does not have it installed, you need to enable "Client Only Mode" from the config menu. _If you do not do this you could crash the game, or the server itself._
 
@@ -180,6 +180,7 @@ All features of this addon that move items around in the inventory require serve
 
 |version|TFC+ versions|changes|
 |:-----:|:-----------:|:------|
+|[1.1.5](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.5)|0.84.1 - 0.86.2|• fixed raw grains stacking with cut grains when picked up|
 |[1.1.4](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.4)|0.84.1 - 0.85.6|• fixed salads and sandwiches not being considered food and water jugs not being considered drinks|
 |[1.1.3](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.3)|0.84.1 - 0.85.6|• fixed crash when certain keys were bound to mouse buttons|
 |[1.1.2](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.2)|0.84.1 - 0.85.3|• added bloomery and blast furnace sounds<br>• fixed bug with bow sounds|
