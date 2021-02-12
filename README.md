@@ -28,7 +28,7 @@ With the auto-refill feature enabled, whenever you break a tool, a new one will 
 
 Moving items to and from vessels and leather bags can be very tedious, as you first have to open up your inventory, drop the first bag in your hotbar, close the menu, right click on the bag from your hotbar, move the items from the bag to your inventory, then open up your inventory again, move the second bag to the hotbar, right click on the second bag...
 
-With this mod, you can simply <kbd>RIGHT CLICK</kbd> on any bag from any inventory screen and the bag will be placed in your hotbar and open right there on the spot. This allows you to swap items in your bag without ever leaving your inventory screen once.
+With this mod, you can simply <kbd>RIGHT CLICK</kbd> on any bag from any inventory screen and the bag will be placed in your hotbar and open right there on the spot. This allows you to swap items in your bag without ever leaving your inventory screen.
 
 ### Quick Tool Swapping
 
