@@ -127,7 +127,7 @@ The textures of 9 chest variants were slighly incorrect leading to these chests 
   <img align="left" width="60" height="60" src="screenshots/spider-eye.png">
   <img align="right" width="60" height="60" src="screenshots/rotten-flesh.png">
   
-  Spider eyes and rotten flesh have absolutely no use in TFC+. Their only purpose for existing is to bog down your inventory - well not anymore. This mod stops rotten flesh and spider eyes from spawning.
+  Spider eyes and rotten flesh have absolutely no use in TFC+. Their only purpose is to bog down your inventory - well not anymore. This mod stops rotten flesh and spider eyes from spawning.
 </p>
 
 ### Config Options
