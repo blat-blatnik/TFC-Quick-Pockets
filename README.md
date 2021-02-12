@@ -22,7 +22,7 @@ While holding <kbd>ALT</kbd> you can then <kbd>SCROLL UP</kbd> or <kbd>SCROLL DO
 
 You're chopping a tree, and your axe suddenly breaks. Aw snap - well thankfully you've come prepared! You have another axe in your inventory just for situations like this. But now you have to open up the inventory menu and swap it into your hand - completely breaking your tree-cutting flow. Not anymore.
 
-With the auto-feature enabled, whenever you break a tool, a new one will be placed into your hand - provided you have a backup in your inventory to begin with. This also works for weapons, food, drinks, building blocks, as well as other items like stone flakes, flowers, etc.
+With the auto-refill feature enabled, whenever you break a tool, a new one will be placed into your hand - provided you have a backup in your inventory to begin with. This also works for weapons, food, drinks, building blocks, as well as other items like stone flakes, flowers, etc.
 
 ### Quick Bag Access
 
