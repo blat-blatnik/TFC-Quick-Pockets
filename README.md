@@ -87,15 +87,11 @@ For a full list of added sounds, as well as the volume sliders that control them
 
 _I do not take credit for making the sounds themselves. The credits for each sound are listed above._
 
-### Waterskin Fix
+### Skip Empty Hotbar Slots
 
-<p align="left">
-  <img align="left" width="56" height="56" src="screenshots/waterskin.png">
-  
-  These little guys are a blessing and a curse. On one hand they hold a lot more water than a clay jug and so you don't have to carry as many of them. On another hand, they are hyperactive little monsters! Every time you fill one up, or drink from it, they change inventory slots, ruining your perfectly organized inventory.
-</p>
+Lets say you have your sword in the left-most slot of your hotbar, and your food is in the right-most slot of the hotbar. If every other slot on your hotbar is empty, then you shouldn't need to scroll through every single empty slot to get from one useful item to another.
 
-This mod adds a very hacky fix for this problem. It detects when a waterskin "hops" inventory slots and places it in the correct slot on the next game tick, saving you the trouble of doing it manually.
+With this mod, empty hotbar slots will be skipped over when you scroll. This is configurable from the _Hotbar Cycling_ config menu.
 
 ### Inventory Fixes
 
