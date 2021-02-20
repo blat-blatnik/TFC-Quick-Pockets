@@ -176,6 +176,7 @@ All features of this addon that move items around in the inventory require serve
 
 |version|TFC+ versions|changes|
 |:-----:|:-----------:|:------|
+|[1.1.6](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.6)|0.87|• removed waterskin fix as it's no longer necessary<br>• added option to skip empty hotbar slots when scrolling|
 |[1.1.5](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.5)|0.84.1 - 0.86.2|• fixed raw grains stacking with cut grains when picked up|
 |[1.1.4](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.4)|0.84.1 - 0.85.6|• fixed salads and sandwiches not being considered food and water jugs not being considered drinks|
 |[1.1.3](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases/tag/v1.1.3)|0.84.1 - 0.85.6|• fixed crash when certain keys were bound to mouse buttons|
