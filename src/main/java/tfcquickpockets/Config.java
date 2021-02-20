@@ -47,6 +47,7 @@ public class Config implements IModGuiFactory {
     public static String HOTBAR_CYCLING_CATEGORY = "hotbar-cycling";
     public static boolean enableHotbarCyclePreview = true;
     public static boolean invertHotbarCycleDirection = false;
+    public static boolean skipEmptyInventorySlots = true;
     public static float hotbarCyclePreviewTransparency = 0.6f;
     public static float hotbarCyclePreviewItemIconScale = 0.5f;
     public static float hotbarCyclePreviewHeight = 0.73f;
@@ -82,9 +83,6 @@ public class Config implements IModGuiFactory {
     public static boolean enableBlastFurnaceSounds = true;
     public static boolean enableFishingRodSounds = true;
     public static boolean enableRopeSounds = true;
-
-    public static String WATERSKIN_FIX_CATEGORY = "waterskin-fix";
-    public static int waterskinFixDelayTicks = 3;
 
     public static String MOB_DROPS_CATEGORY = "mob-drops";
     public static boolean disableRottenFlesh = true;
@@ -136,6 +134,8 @@ public class Config implements IModGuiFactory {
                 "\nWhether to show a preview of the next and previous inventory slots when cycling through the hotbar.\n\n");
         invertHotbarCycleDirection = config.getBoolean("Invert Scrolling Direction", HOTBAR_CYCLING_CATEGORY, false,
                 "\nIf set to true, scrolling the mouse wheel up will move you *down* one inventory row, otherwise scrolling up will move you *up*.\n\n");
+        skipEmptyInventorySlots = config.getBoolean("Skip Empty Inventory Slots", HOTBAR_CYCLING_CATEGORY, true,
+            "\nWhether to skip over empty inventory slots when scrolling through them.\n\n");
         hotbarCyclePreviewTransparency = config.getFloat("Hotbar Preview Transparency", HOTBAR_CYCLING_CATEGORY, 0.6f, 0.0f, 1.0f,
                 "\nHow transparent the hotbar cycling preview slots will appear.\n\nThis doesn't affect the current hotbar row, only the preview rows.\n\n");
         hotbarCyclePreviewItemIconScale = config.getFloat("Hotbar Preview Item Icon Scale", HOTBAR_CYCLING_CATEGORY, 0.5f, 0.0f, 1.0f,
@@ -201,9 +201,6 @@ public class Config implements IModGuiFactory {
         enableRopeSounds = config.getBoolean("Enable Rope Sounds", SOUNDS_CATEGORY, true,
                 "\nWhether to play sounds when tying a rope to a fence, attach it to an animal, or when the rope snaps.\n\n");
 
-        waterskinFixDelayTicks = config.getInt("Waterskin Fix Delay Ticks", WATERSKIN_FIX_CATEGORY, 3, 0, 20,
-                "\nThe waterskin fix might not always work depending on your exact setup, you can tweak it here.\n\nLower values will try to fix the waterskin faster, but are less likely to work. Higher values have a higher chance to work but with a noticeable delay.\n\nSet this to 0 to disable the waterskin fix.\n\n");
-
         disableRottenFlesh = config.getBoolean("Disable Rotten Flesh", MOB_DROPS_CATEGORY, true,
                 "\nWhether to disable rotten flesh drops from zombies. Rotten flesh has no in-game uses.\n\n");
         disableSpiderEyes = config.getBoolean("Disable Spider Eyes", MOB_DROPS_CATEGORY, true,
@@ -222,7 +219,6 @@ public class Config implements IModGuiFactory {
             allowQuickAccessVessel = false;
             allowQuickAccessHideBag = false;
             allowQuickAccessLeatherBag = false;
-            waterskinFixDelayTicks = 0;
             disableSpiderEyes = false;
             disableRottenFlesh = false;
             enableHotbarCyclePreview = false;
@@ -275,7 +271,6 @@ public class Config implements IModGuiFactory {
             elements.add(new CategoryElement(WALK_IN_INVENTORY_CATEGORY, "Walk in Inventory", false));
             elements.add(new CategoryElement(QUICK_ACCESS_CATEGORY, "Quick Access", true));
             elements.add(new CategoryElement(SOUNDS_CATEGORY, "Sounds", false));
-            elements.add(new CategoryElement(WATERSKIN_FIX_CATEGORY, "Waterskin Fix", true));
             elements.add(new CategoryElement(MOB_DROPS_CATEGORY, "Useless Mob Drops", true));
             return elements;
         }

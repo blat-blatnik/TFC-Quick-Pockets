@@ -155,11 +155,6 @@ public class ClientStuff extends ClientAndServerStuff {
     public static int lastToolSwapSelectedSlot = -1;
     public static ItemStack[] lastToolSwapInventorySlots = new ItemStack[HOTBAR_SIZE + 3 * INVENTORY_ROW_SIZE];
     public static int selectedSlotAtStartOfMouseInput = -1;
-    public static int drinkSlotIndexPreUse = -1;
-    public static int drinkSlotIndexPostUse = -1;
-    public static Item drinkToFix = null;
-    public static long drinkFixRemainingDelayTicks = -1;
-    public static ItemStack[] inventoryDuringDrink = new ItemStack[HOTBAR_SIZE + 3 * INVENTORY_ROW_SIZE];
     public static ItemStack lastHeldStack = null;
     public static int lastSelectedItem = -1;
     public static int switchHotbarSlotSoundWaitTicks = 0;
@@ -361,15 +356,37 @@ public class ClientStuff extends ClientAndServerStuff {
 
     @SubscribeEvent(priority=EventPriority.LOWEST) @SuppressWarnings("unused")
     public void cycleThroughInventoryRowsOnMouseScroll(InputEvent.MouseInputEvent event) {
-        if (!Config.clientOnlyMode) {
-            int delta = Mouse.getEventDWheel();
-            if (delta != 0) {
-                if (cycleHotbar.getIsKeyPressed()) {
-                    if (Config.invertHotbarCycleDirection)
-                        delta = -delta;
+        int delta = Mouse.getEventDWheel();
+        if (delta != 0) {
+            if (!Config.clientOnlyMode && cycleHotbar.getIsKeyPressed()) {
+                if (Config.invertHotbarCycleDirection)
+                    delta = -delta;
 
-                    sendCycleInventoryRowsToServer(delta < 0);
-                    setCurrentPlayerItem(selectedSlotAtStartOfMouseInput);
+                sendCycleInventoryRowsToServer(delta < 0);
+                setCurrentPlayerItem(selectedSlotAtStartOfMouseInput);
+            } else if (Config.skipEmptyInventorySlots) {
+
+                ItemStack[] inventory = minecraft.thePlayer.inventory.mainInventory;
+
+                boolean wholeHotbarIsEmpty = true;
+                for (int i = 0; i < 9; ++i)
+                    if (inventory[i] != null) {
+                        wholeHotbarIsEmpty = false;
+                        break;
+                    }
+
+                // Don't skip when whole hotbar is empty --- it's sometimes fun to flip inventory spaces randomly :)
+                if (!wholeHotbarIsEmpty) {
+                    int slotIndex = selectedSlotAtStartOfMouseInput;
+                    int direction = delta > 0 ? -1 : +1;
+                    do {
+                        slotIndex = slotIndex + direction;
+                        if (slotIndex < 0)
+                            slotIndex = 8;
+                        if (slotIndex > 8)
+                            slotIndex = 0;
+                    } while (inventory[slotIndex] == null && slotIndex != selectedSlotAtStartOfMouseInput);
+                    setCurrentPlayerItem(slotIndex);
                 }
             }
         }
@@ -563,113 +580,6 @@ public class ClientStuff extends ClientAndServerStuff {
         }
     }
 
-    @SubscribeEvent @SuppressWarnings("unused")
-    public void recordWaterskinInventorySlotOnFill(InputEvent.MouseInputEvent event) {
-        final int RIGHT_MOUSE_BUTTON = 1;
-        EntityPlayer player = minecraft.thePlayer;
-        WorldClient world = minecraft.theWorld;
-
-        if (Config.waterskinFixDelayTicks > 0 && player != null && world != null && player.inventory != null && Mouse.getEventButton() == RIGHT_MOUSE_BUTTON) {
-            ItemStack[] inventory = player.inventory.mainInventory;
-            int currentItemIndex = player.inventory.currentItem;
-            ItemStack currentStack = inventory[currentItemIndex];
-            if (currentStack != null && currentStack.getItem() == ItemSetup.waterskinEmpty) {
-
-                MovingObjectPosition mop = Helper.getMovingObjectPositionFromPlayer(world, player, true, 4);
-                if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-                    int x = mop.blockX;
-                    int y = mop.blockY;
-                    int z = mop.blockZ;
-                    int flowX = x;
-                    int flowY = y;
-                    int flowZ = z;
-                    switch(mop.sideHit) {
-                        case 0:
-                            flowY = y - 1;
-                            break;
-                        case 1:
-                            flowY = y + 1;
-                            break;
-                        case 2:
-                            flowZ = z - 1;
-                            break;
-                        case 3:
-                            flowZ = z + 1;
-                            break;
-                        case 4:
-                            flowX = x - 1;
-                            break;
-                        case 5:
-                            flowX = x + 1;
-                    }
-
-                    if (!player.isSneaking() && TFC_Core.isFreshWater(world.getBlock(x, y, z)) || TFC_Core.isFreshWater(world.getBlock(flowX, flowY, flowZ))) {
-                        int nextItemSlotIndex = player.inventory.getFirstEmptyStack();
-                        if (nextItemSlotIndex >= 0) {
-                            drinkSlotIndexPreUse = currentItemIndex;
-                            drinkSlotIndexPostUse = nextItemSlotIndex;
-                            drinkFixRemainingDelayTicks = Config.waterskinFixDelayTicks;
-                            drinkToFix = ItemSetup.waterskin;
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-
-    @SubscribeEvent @SuppressWarnings("unused")
-    public void recordPlayerInventoryWhileDrinkingFromWaterskin(PlayerUseItemEvent.Tick event) {
-        if (Config.waterskinFixDelayTicks > 0) {
-            ItemStack[] inventory = event.entityPlayer.inventory.mainInventory;
-            System.arraycopy(inventory, 0, inventoryDuringDrink, 0, inventory.length);
-        }
-    }
-
-    @SubscribeEvent @SuppressWarnings("unused")
-    public void recordWaterskinInventorySlotOnDrink(PlayerUseItemEvent.Finish event) {
-        if (Config.waterskinFixDelayTicks > 0 && event.item != null) {
-            ItemStack itemStack = event.item;
-            Item item = itemStack.getItem();
-            if (item instanceof ItemDrink) {
-                ItemStack[] items = event.entityPlayer.inventory.mainInventory;
-
-                for (int i = 0; i < items.length; ++i) {
-                    if (items[i] != null) {
-                        if (items[i] == itemStack) {
-                            drinkSlotIndexPreUse = i;
-                        } else {
-                            Item slotItem = items[i].getItem();
-                            if (slotItem == item && items[i].animationsToGo == 5) {
-                                drinkSlotIndexPostUse = i;
-                                drinkToFix = items[i].getItem();
-                            }
-                        }
-                    }
-                }
-
-                if (drinkSlotIndexPreUse >= 0 && drinkSlotIndexPostUse < 0) {
-                    // this should only happen if the player fully empties out the waterskin
-                    for (int i = 0; i < items.length; ++i) {
-                        if (inventoryDuringDrink[i] == null && items[i] != null) {
-                            drinkSlotIndexPostUse = i;
-                            drinkToFix = ItemSetup.waterskinEmpty;
-                            break;
-                        }
-                    }
-                }
-
-                if (drinkSlotIndexPreUse >= 0 && drinkSlotIndexPostUse >= 0) {
-                    drinkFixRemainingDelayTicks = Config.waterskinFixDelayTicks;
-                } else {
-                    drinkSlotIndexPreUse = -1;
-                    drinkSlotIndexPostUse = -1;
-                    drinkToFix = null;
-                }
-            }
-        }
-    }
-
     //@SubscribeEvent @SuppressWarnings("unused")
     //public void playFishingRodSounds(PlayerUseItemEvent.Tick event) {
     //    if (Config.enableFishingRodSounds && event.entityPlayer != null && event.item != null && event.item.getItem() instanceof ItemCustomFishingRod) {
@@ -739,30 +649,6 @@ public class ClientStuff extends ClientAndServerStuff {
                 checkIfNeedToDoAutoFill();
 
             } else if (event.phase == TickEvent.Phase.END) {
-
-                if (!Config.clientOnlyMode && Config.waterskinFixDelayTicks > 0) {
-                    ItemStack[] inventory = minecraft.thePlayer.inventory.mainInventory;
-
-                    if (drinkToFix != null && drinkSlotIndexPreUse >= 0 && drinkSlotIndexPostUse >= 0) {
-                        if (--drinkFixRemainingDelayTicks == 0) {
-
-                            ItemStack preDrink = inventory[drinkSlotIndexPreUse];
-                            ItemStack postDrink = inventory[drinkSlotIndexPostUse];
-
-                            if (preDrink == null && postDrink != null && postDrink.getItem() == drinkToFix) {
-
-                                int slot1 = convertInventoryIndexToSlotIndex(drinkSlotIndexPreUse);
-                                int slot2 = convertInventoryIndexToSlotIndex(drinkSlotIndexPostUse);
-                                sendSwapPlayerInventorySlotsToServer(slot1, slot2);
-                                inventory[drinkSlotIndexPreUse].animationsToGo = 0;
-                            }
-
-                            drinkSlotIndexPreUse = -1;
-                            drinkSlotIndexPostUse = -1;
-                            drinkToFix = null;
-                        }
-                    }
-                }
 
                 checkIfNeedToDoAutoFill();
 
