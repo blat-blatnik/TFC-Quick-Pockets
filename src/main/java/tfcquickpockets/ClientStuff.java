@@ -106,7 +106,7 @@ import java.util.List;
 
 public class ClientStuff extends ClientAndServerStuff {
 
-    public static int HOTBAR_SIZE = InventoryPlayer.getHotbarSize();
+    public static int HOTBAR_SIZE = 9; // InventoryPlayer.getHotbarSize() causes a very strange crash <.<
     public static int INVENTORY_ROW_SIZE = 9;
     public static double BACKGROUND_FILTER_TRANSITION_SECONDS = 0.15;
     public static int SOUND_TICKS_BEFORE_REPEAT = 2;
