@@ -163,11 +163,11 @@ After it has finished, the mod you built should be in the `./build/libs/` direct
 
 Download the latest version [here](https://github.com/blat-blatnik/TFC-Quick-Pockets/releases). 
 
-Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.86.2. 
+Put the downloaded `jar` file in your [`mods`](https://gaming.stackexchange.com/questions/151317/where-is-the-mod-folder) folder, right alongside TFC+. Tested and working with TFC+ 0.84.1 -- 0.87.0. 
 
 All features of this addon that move items around in the inventory require server support to function. If you want to play with this addon on a server that does not have it installed, you need to enable "Client Only Mode" from the config menu. _If you do not do this you could crash the game, or the server itself._
 
-**Note** This mod manipulates your inventory. This can sometimes result in items being duplicated, or lost when a severe bug is present. I try to fix critical things like this as soon as possible, and the mod has been tested somewhat thoroughly at this point, but some problems may still have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
+**Note** This mod manipulates your inventory. This means that in case of buggy code, the mod could duplicate or delete items from your inventory too. I try to fix critical bugs like this as soon as possible, and the mod has been tested somewhat thoroughly at this point, but some problems may still have slipped through the cracks. Only use this if you understand the risks. _**Back up** your beloved save games before using this mod_.
 
 ## Version History
 
